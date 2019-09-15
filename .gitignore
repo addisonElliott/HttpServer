@@ -41,3 +41,6 @@ target_wrapper.*
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
+# File meant for user-specific includes
+common.pri
