@@ -12,8 +12,6 @@ int main(int argc, char *argv[])
     config.requestTimeout = 20;
     config.verbosity = HttpServerConfig::Verbose::All;
     config.maxMultipartSize = 512 * 1024 * 1024;
-    config.sslKeyPath = "C:/Users/Addison/Documents/CProjects/HttpServer/test/becs.key";
-    config.sslCertPath = "C:/Users/Addison/Documents/CProjects/HttpServer/test/becs.crt";
     config.errorDocumentMap[HttpStatus::NotFound] = "data/404_2.html";
     config.errorDocumentMap[HttpStatus::InternalServerError] = "data/404_2.html";
     config.errorDocumentMap[HttpStatus::BadGateway] = "data/404_2.html";

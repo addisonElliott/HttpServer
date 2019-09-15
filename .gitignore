@@ -44,3 +44,13 @@ CMakeLists.txt.user*
 
 # File meant for user-specific includes
 *.pri
+
+# Output files
+debug/
+release/
+
+# Public/private key files for TLS
+*.crt
+*.csr
+*.key
+*.p12
