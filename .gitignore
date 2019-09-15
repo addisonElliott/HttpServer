@@ -43,4 +43,4 @@ target_wrapper.*
 CMakeLists.txt.user*
 
 # File meant for user-specific includes
-common.pri
+*.pri
