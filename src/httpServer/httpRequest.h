@@ -143,6 +143,7 @@ template<> HTTPSERVER_EXPORT unsigned int HttpRequest::headerDefault(QString key
 template<> HTTPSERVER_EXPORT long HttpRequest::headerDefault(QString key, long defaultValue, bool *ok) const;
 template<> HTTPSERVER_EXPORT unsigned long HttpRequest::headerDefault(QString key, unsigned long defaultValue, bool *ok) const;
 template<> HTTPSERVER_EXPORT QString HttpRequest::headerDefault(QString key, QString defaultValue, bool *ok) const;
+template<> HTTPSERVER_EXPORT const char *HttpRequest::headerDefault(QString key, const char *defaultValue, bool *ok) const;
 template<> HTTPSERVER_EXPORT QDateTime HttpRequest::headerDefault(QString key, QDateTime defaultValue, bool *ok) const;
 template<> HTTPSERVER_EXPORT float HttpRequest::headerDefault(QString key, float defaultValue, bool *ok) const;
 template<> HTTPSERVER_EXPORT double HttpRequest::headerDefault(QString key, double defaultValue, bool *ok) const;

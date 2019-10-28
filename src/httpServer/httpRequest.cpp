@@ -748,6 +748,20 @@ QString HttpRequest::headerDefault(QString key, QString defaultValue, bool *ok) 
 }
 
 template <>
+const char *HttpRequest::headerDefault(QString key, const char *defaultValue, bool *ok) const
+{
+    auto it = headers.find(key);
+    if (it == headers.end())
+    {
+        if (ok) *ok = false;
+        return defaultValue;
+    }
+
+    if (ok) *ok = true;
+    return it->second.toStdString().c_str();
+}
+
+template <>
 QDateTime HttpRequest::headerDefault(QString key, QDateTime defaultValue, bool *ok) const
 {
     auto it = headers.find(key);
