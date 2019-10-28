@@ -74,7 +74,7 @@ void HttpServer::loadSslConfig()
             return;
         }
 
-        QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+        QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey, config.sslKeyPassPhrase);
         keyFile.close();
 
         if (sslKey.isNull())
@@ -84,6 +84,12 @@ void HttpServer::loadSslConfig()
 
             return;
         }
+		
+        sslConfig = new QSslConfiguration();
+        sslConfig->setLocalCertificate(certificate);
+        sslConfig->setPrivateKey(sslKey);
+        sslConfig->setPeerVerifyMode(QSslSocket::VerifyNone);
+        sslConfig->setProtocol(QSsl::SecureProtocols);
 
         if (config.verbosity >= HttpServerConfig::Verbose::Debug)
             qDebug().noquote() << "Successfully setup SSL configuration, HTTPS enabled";
