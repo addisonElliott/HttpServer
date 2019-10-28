@@ -289,7 +289,7 @@ bool HttpRequest::parseBody(QTcpSocket *socket, HttpResponse *response)
         buffer.clear();
 
         // Decompress gzip requests
-        if (expectedBodySize > 0 && headerDefault("Content-Encoding", QString("")) == "gzip")
+        if (expectedBodySize > 0 && headerDefault("Content-Encoding", "") == "gzip")
         {
             body_ = gzipUncompress(body_);
 
@@ -747,8 +747,7 @@ QString HttpRequest::headerDefault(QString key, QString defaultValue, bool *ok) 
     return it->second;
 }
 
-template <>
-const char *HttpRequest::headerDefault(QString key, const char *defaultValue, bool *ok) const
+QString HttpRequest::headerDefault(QString key, const char *defaultValue, bool *ok) const
 {
     auto it = headers.find(key);
     if (it == headers.end())
@@ -758,7 +757,7 @@ const char *HttpRequest::headerDefault(QString key, const char *defaultValue, bo
     }
 
     if (ok) *ok = true;
-    return it->second.toStdString().c_str();
+    return it->second;
 }
 
 template <>

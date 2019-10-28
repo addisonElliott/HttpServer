@@ -250,7 +250,7 @@ void HttpResponse::setupFromRequest(HttpRequest *request)
 {
     // If no connection is specified in the response, use the value from the request or default to keep-alive
     if (headers.find("Connection") == headers.end())
-        headers["Connection"] = request ? request->headerDefault("Connection", QString("keep-alive")) : "keep-alive";
+        headers["Connection"] = request ? request->headerDefault("Connection", "keep-alive") : "keep-alive";
 
     if (status_ == HttpStatus::MethodNotAllowed && request)
     {

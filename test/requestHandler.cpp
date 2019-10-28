@@ -59,7 +59,7 @@ void RequestHandler::handleGzipTest(const QRegularExpressionMatch &match, HttpRe
             \
             If only 16 bytes, then je";
 
-    if (request->headerDefault("Content-Encoding", QString("")) == "gzip")
+    if (request->headerDefault("Content-Encoding", "") == "gzip")
     {
         qInfo() << request->parseBodyStr();
     }
