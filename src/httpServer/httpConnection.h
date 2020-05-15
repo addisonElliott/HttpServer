@@ -13,8 +13,11 @@
 #include <QThread>
 #include <QSslConfiguration>
 #include <QTimer>
+#include <QtPromise>
 #include <queue>
 
+
+using QtPromise::QPromiseTimeoutException;
 
 class HTTPSERVER_EXPORT HttpConnection : public QObject
 {

@@ -66,8 +66,10 @@ public:
     void redirect(QString url, bool permanent = false);
     void compressBody(int compressionLevel = Z_DEFAULT_COMPRESSION);
 
-    void sendFile(QString filename, QString mimeType = "", QString charset = "", int len = -1, int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
-    void sendFile(QIODevice *device, QString mimeType = "", QString charset = "", int len = -1, int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
+    void sendFile(QString filename, QString mimeType = "", QString charset = "", int len = -1,
+        int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
+    void sendFile(QIODevice *device, QString mimeType = "", QString charset = "", int len = -1,
+        int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
 
     void setCookie(HttpCookie &cookie);
 

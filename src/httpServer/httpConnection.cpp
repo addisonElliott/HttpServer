@@ -94,16 +94,17 @@ void HttpConnection::read()
                 promise = promise.timeout(config->responseTimeout);
 
             promise
-                .fail([](const QPromiseTimeoutException& error) {
+                .fail([=](const QPromiseTimeoutException &error) {
                     // Request timed out
                     currentResponse->setError(HttpStatus::RequestTimeout, "", false);
-                    currentResponse->prepareToSend();
-
-                    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-                    if (currentResponse == pendingResponses.front())
-                        bytesWritten(0);
                 })
-                .finally([]() {
+                .fail([=](const HttpException &error) {
+                    currentResponse->setError(error.status, error.message, false);
+                })
+                .finally([=]() {
+                    // TODO What if no response set???
+
+                    // Send response
                     currentResponse->prepareToSend();
 
                     // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
@@ -114,34 +115,12 @@ void HttpConnection::read()
 
         currentResponse->setupFromRequest(currentRequest);
 
-        if (currentResponse->isValid())
-        {
-            // Save the request (delete after done sending response)
-            requests.emplace(currentResponse, currentRequest);
-            currentRequest = nullptr;
+        // Save the request (delete after done sending response)
+        requests.emplace(currentResponse, currentRequest);
+        currentRequest = nullptr;
 
-            currentResponse->prepareToSend();
-            pendingResponses.push(currentResponse);
-            currentResponse = nullptr;
-
-            // If this is the only pending response, call bytesWritten to get things rolling
-            if (pendingResponses.size() == 1)
-                bytesWritten(0);
-        }
-        else
-        {
-            // We connect as a queued connection so that the function will be called on the next event loop. This allows additional instructions to be called
-            // to the response before actually sending the data
-            connect(currentResponse, &HttpResponse::finished, this, &HttpConnection::responseFinished,
-                Qt::QueuedConnection);
-
-            // Save the request (delete after done sending response)
-            requests.emplace(currentResponse, currentRequest);
-            currentRequest = nullptr;
-
-            pendingResponses.push(currentResponse);
-            currentResponse = nullptr;
-        }
+        pendingResponses.push(currentResponse);
+        currentResponse = nullptr;
     }
 }
 
