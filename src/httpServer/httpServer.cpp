@@ -1,7 +1,7 @@
 #include "httpServer.h"
 
-HttpServer::HttpServer(const HttpServerConfig &config, HttpRequestHandler *requestHandler, QObject *parent) : QTcpServer(parent), config(config), requestHandler(requestHandler),
-    sslConfig(nullptr)
+HttpServer::HttpServer(const HttpServerConfig &config, HttpRequestHandler *requestHandler, QObject *parent) :
+    QTcpServer(parent), config(config), requestHandler(requestHandler), sslConfig(nullptr)
 {
     setMaxPendingConnections(config.maxPendingConnections);
     loadSslConfig();
@@ -12,7 +12,10 @@ bool HttpServer::listen()
     if (!QTcpServer::listen(config.host, config.port))
     {
         if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-            qWarning().noquote() << QString("Unable to listen on %1:%2: %3").arg(config.host.toString()).arg(config.port).arg(errorString());
+        {
+            qWarning().noquote() << QString("Unable to listen on %1:%2: %3").arg(config.host.toString())
+                .arg(config.port).arg(errorString());
+        }
 
         return false;
     }
@@ -37,8 +40,10 @@ void HttpServer::loadSslConfig()
         if (!QSslSocket::supportsSsl())
         {
             if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-                qWarning().noquote() << QString("OpenSSL is not supported for HTTP server (OpenSSL Qt build version: %1). Disabling TLS")
-                                        .arg(QSslSocket::sslLibraryBuildVersionString());
+            {
+                qWarning().noquote() << QString("OpenSSL is not supported for HTTP server (OpenSSL Qt build "
+                    "version: %1). Disabling TLS").arg(QSslSocket::sslLibraryBuildVersionString());
+            }
 
             return;
         }
@@ -48,7 +53,10 @@ void HttpServer::loadSslConfig()
         if (!certFile.open(QIODevice::ReadOnly))
         {
             if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-                qWarning().noquote() << QString("Failed to open SSL certificate file for HTTP server: %1 (%2). Disabling TLS").arg(config.sslCertPath).arg(certFile.errorString());
+            {
+                qWarning().noquote() << QString("Failed to open SSL certificate file for HTTP server: %1 (%2). "
+                    "Disabling TLS").arg(config.sslCertPath).arg(certFile.errorString());
+            }
 
             return;
         }
@@ -59,7 +67,10 @@ void HttpServer::loadSslConfig()
         if (certificate.isNull())
         {
             if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-                qWarning().noquote() << QString("Invalid SSL certificate file for HTTP server: %1. Disabling TLS").arg(config.sslCertPath);
+            {
+                qWarning().noquote() << QString("Invalid SSL certificate file for HTTP server: %1. Disabling TLS")
+                    .arg(config.sslCertPath);
+            }
 
             return;
         }
@@ -69,7 +80,10 @@ void HttpServer::loadSslConfig()
         if (!keyFile.open(QIODevice::ReadOnly))
         {
             if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-                qWarning().noquote() << QString("Failed to open private SSL key file for HTTP server: %1 (%2). Disabling TLS").arg(config.sslKeyPath).arg(keyFile.errorString());
+            {
+                qWarning().noquote() << QString("Failed to open private SSL key file for HTTP server: %1 (%2). "
+                    "Disabling TLS").arg(config.sslKeyPath).arg(keyFile.errorString());
+            }
 
             return;
         }
@@ -80,11 +94,14 @@ void HttpServer::loadSslConfig()
         if (sslKey.isNull())
         {
             if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-                qWarning().noquote() << QString("Invalid private SSL key for HTTP server: %1. Disabling TLS").arg(config.sslKeyPath);
+            {
+                qWarning().noquote() << QString("Invalid private SSL key for HTTP server: %1. Disabling TLS")
+                    .arg(config.sslKeyPath);
+            }
 
             return;
         }
-		
+
         sslConfig = new QSslConfiguration();
         sslConfig->setLocalCertificate(certificate);
         sslConfig->setPrivateKey(sslKey);
@@ -116,7 +133,10 @@ void HttpServer::incomingConnection(qintptr socketDescriptor)
         }
 
         if (config.verbosity >= HttpServerConfig::Verbose::Warning)
-            qWarning() << QString("Maximum connections reached (%1). Rejecting connection from %2").arg(config.maxConnections).arg(socket->peerAddress().toString());
+        {
+            qWarning() << QString("Maximum connections reached (%1). Rejecting connection from %2")
+                .arg(config.maxConnections).arg(socket->peerAddress().toString());
+        }
 
         HttpResponse *response = new HttpResponse(&config);
         response->setError(HttpStatus::ServiceUnavailable, "Too many connections", true);
@@ -147,7 +167,8 @@ void HttpServer::connectionDisconnected()
     if (it != connections.end())
         connections.erase(it);
 
-    // We do delete later here because if this signal was emitted while socket is disconnecting, it still needs the socket reference for a bit
+    // We do delete later here because if this signal was emitted while socket is disconnecting, it still needs the
+    // socket reference for a bit
     connection->deleteLater();
 }
 

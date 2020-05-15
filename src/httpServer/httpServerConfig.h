@@ -23,16 +23,17 @@ struct HTTPSERVER_EXPORT HttpServerConfig
 
     int maxConnections = 100;
     int maxPendingConnections = 100;
-	
+
     int maxRequestSize = 16 * 1024;
     int maxMultipartSize = 1 * 1024 * 1024;
 
     // Timeout time in seconds to receive a request
-    // The request timeout is applied for the first request and will usually be set higher. If a request is not received by this time, an error response will be sent back.
-    // The keep alive timeout is the amount of time to keep the connection alive for future requests. If this timeout is met, the socket is closed and the client must open a new
-    // connection.
-    // The response timeout is only started and used if a response is not returned immediately. This is the number of seconds that a handler has to finish processing asynchronously
-    // before a timeout will occur
+    // The request timeout is applied for the first request and will usually be set higher. If a request is not
+    // received by this time, an error response will be sent back.
+    // The keep alive timeout is the amount of time to keep the connection alive for future requests. If this timeout
+    // is met, the socket is closed and the client must open a new connection.
+    // The response timeout is only started and used if a response is not returned immediately. This is the number of
+    // seconds that a handler has to finish processing asynchronously before a timeout will occur
     int requestTimeout = 10;
     int keepAliveTimeout = 5;
     int responseTimeout = 10;
@@ -41,7 +42,7 @@ struct HTTPSERVER_EXPORT HttpServerConfig
     QString defaultCharset = "utf-8";
 
     Verbose verbosity = Verbose::None;
-	
+
     QString sslKeyPath = "";
 	QByteArray sslKeyPassPhrase;
     QString sslCertPath = "";

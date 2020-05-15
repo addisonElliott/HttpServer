@@ -82,7 +82,8 @@ public:
     bool writeChunk(QTcpSocket *socket);
 
 signals:
-    // When this signal is called, if asynchronous work is being done, the user MUST not use the response pointer again because it will be deleted
+    // When this signal is called, if asynchronous work is being done, the user MUST not use the response pointer
+    // again because it will be deleted
     void cancelled();
 };
 

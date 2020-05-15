@@ -3,7 +3,8 @@
 
 HTTPSERVER_EXPORT QMimeDatabase HttpResponse::mimeDatabase;
 
-HttpResponse::HttpResponse(HttpServerConfig *config, QObject *parent) : QObject(parent), config(config), status_(HttpStatus::None)
+HttpResponse::HttpResponse(HttpServerConfig *config, QObject *parent) : QObject(parent), config(config),
+    status_(HttpStatus::None)
 {
 }
 
@@ -128,7 +129,8 @@ void HttpResponse::setError(HttpStatus status, QString errorMessage, bool closeC
         setStatus(status);
     }
 
-    // If close connection is false, leave the connection header alone to default to what the client sent (or keep-alive if client sends nothing)
+    // If close connection is false, leave the connection header alone to default to what the client sent (or
+    // keep-alive if client sends nothing)
     if (closeConnection)
         headers["Connection"] = "close";
 }
@@ -155,7 +157,8 @@ void HttpResponse::compressBody(int compressionLevel)
     setHeader("Content-Encoding", "gzip");
 }
 
-void HttpResponse::sendFile(QString filename, QString mimeType, QString charset, int len, int compressionLevel, QString attachmentFilename, int cacheTime)
+void HttpResponse::sendFile(QString filename, QString mimeType, QString charset, int len, int compressionLevel,
+    QString attachmentFilename, int cacheTime)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
@@ -172,7 +175,8 @@ void HttpResponse::sendFile(QString filename, QString mimeType, QString charset,
     sendFile(&file, mimeType, charset, len, compressionLevel, attachmentFilename, cacheTime);
 }
 
-void HttpResponse::sendFile(QIODevice *device, QString mimeType, QString charset, int len, int compressionLevel, QString attachmentFilename, int cacheTime)
+void HttpResponse::sendFile(QIODevice *device, QString mimeType, QString charset, int len, int compressionLevel,
+    QString attachmentFilename, int cacheTime)
 {
     body_ = len != -1 ? device->read(len) : device->readAll();
 
@@ -197,7 +201,10 @@ void HttpResponse::setCookie(HttpCookie &cookie)
     if (cookies.find(cookie.name) != cookies.end())
     {
         if (config->verbosity >= HttpServerConfig::Verbose::Warning)
-            qWarning().noquote() << QString("HTTP response cannot have two cookies with the same name: %1").arg(cookie.name);
+        {
+            qWarning().noquote() << QString("HTTP response cannot have two cookies with the same name: %1")
+                .arg(cookie.name);
+        }
 
         return;
     }

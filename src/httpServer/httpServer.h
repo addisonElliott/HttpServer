@@ -11,7 +11,8 @@
 #include <QTcpServer>
 
 
-// HTTP server is HTTP/1.1 compliant and is based on RFC7230 series. This specification was created in June 2014 and obsoletes RFC2616, RFC2145
+// HTTP server is HTTP/1.1 compliant and is based on RFC7230 series. This specification was created in June 2014 and
+// obsoletes RFC2616, RFC2145
 class HTTPSERVER_EXPORT HttpServer : public QTcpServer
 {
     Q_OBJECT

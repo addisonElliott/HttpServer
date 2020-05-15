@@ -33,25 +33,29 @@ public:
     template <typename T>
     void addRoute(QString method, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
     {
-        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
     }
 
     template <typename T>
     void addRoute(QString method, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
     {
-        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
     }
 
     template <typename T>
     void addRoute(std::vector<QString> methods, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
     {
-        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
     }
 
     template <typename T>
     void addRoute(std::vector<QString> methods, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
     {
-        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3));
     }
 
     bool route(HttpRequest *request, HttpResponse *response);
