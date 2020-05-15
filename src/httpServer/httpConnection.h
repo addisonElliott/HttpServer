@@ -25,7 +25,6 @@ private:
     QTcpSocket *socket;
     QHostAddress address;
     QTimer *timeoutTimer;
-    std::unordered_map<HttpResponse *, QTimer *> responseTimers;
     bool keepAliveMode;
 
     HttpRequest *currentRequest;

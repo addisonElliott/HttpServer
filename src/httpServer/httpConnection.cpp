@@ -127,15 +127,6 @@ void HttpConnection::read()
         }
         else
         {
-            // Start response timer
-            if (config->responseTimeout > 0)
-            {
-                QTimer *responseTimer = new QTimer(this);
-                connect(responseTimer, &QTimer::timeout, this, &HttpConnection::responseTimeout);
-                responseTimers.emplace(currentResponse, responseTimer);
-                responseTimer->start(config->responseTimeout * 1000);
-            }
-
             // We connect as a queued connection so that the function will be called on the next event loop. This allows additional instructions to be called
             // to the response before actually sending the data
             connect(currentResponse, &HttpResponse::finished, this, &HttpConnection::responseFinished, Qt::QueuedConnection);
@@ -234,9 +225,6 @@ void HttpConnection::socketDisconnected()
 
     timeoutTimer->stop();
 
-    for (auto timer : responseTimers)
-        timer.second->stop();
-
     emit disconnected();
 }
 
@@ -261,10 +249,6 @@ HttpConnection::~HttpConnection()
 {
     delete timeoutTimer;
     delete socket;
-
-    for (auto timer : responseTimers)
-        delete timer.second;
-    responseTimers.clear();
 
     // Delete pending responses
     while (!pendingResponses.empty())
