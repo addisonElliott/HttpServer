@@ -81,6 +81,30 @@ void HttpConnection::read()
         // We are done parsing data, whether it be an error or not
         timeoutTimer->stop();
 
+        if (currentResponse->isValid())
+        {
+            currentResponse->setupFromRequest(currentRequest);
+
+            // Save the request (delete after done sending response)
+            requests.emplace(currentResponse, currentRequest);
+            currentRequest = nullptr;
+
+            pendingResponses.push(currentResponse);
+            currentResponse = nullptr;
+
+            // TODO Fix me....
+            return;
+        }
+
+        /*
+
+        TODO How to handle this?
+
+        So we will need to add it regardless it seems, even if it's a synchronous request...
+
+
+        */
+
         // If a response exists, then just send that, doesn't matter if its an error or not
         if (!currentResponse->isValid())
         {
@@ -101,8 +125,21 @@ void HttpConnection::read()
                 .fail([=](const HttpException &error) {
                     currentResponse->setError(error.status, error.message, false);
                 })
+                .fail([=](const std::exception &error) {
+                    currentResponse->setError(HttpStatus::InternalServerError, error.what(), false);
+                })
                 .finally([=]() {
-                    // TODO What if no response set???
+                    // Handle if no response is set
+                    // This should not happen, but handle it and warn the user
+                    if (!currentResponse->isValid())
+                    {
+                        if (config->verbosity >= HttpServerConfig::Verbose::Warning)
+                        {
+                            qWarning().noquote() << QString("No valid response set, defaulting to 500: %1 %2 %3")
+                                .arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
+                        }
+                        currentResponse->setError(HttpStatus::InternalServerError, "An unknown error occurred", false);
+                    }
 
                     // Send response
                     currentResponse->prepareToSend();
