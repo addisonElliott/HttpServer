@@ -2,7 +2,7 @@
 
 RequestHandler::RequestHandler()
 {
-    router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
+    // router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
     // router.addRoute({"GET", "POST"}, "^/gzipTest/?$", this, &RequestHandler::handleGzipTest);
     // router.addRoute({"GET", "POST"}, "^/formTest/?$", this, &RequestHandler::handleFormTest);
     // router.addRoute("GET", "^/fileTest/(\\d*)/?$", this, &RequestHandler::handleFileTest);
@@ -12,33 +12,36 @@ RequestHandler::RequestHandler()
 
 QPromise<void> RequestHandler::handle(HttpRequest *request, HttpResponse *response)
 {
+    // router.route(request, response);
+
     // If this is handled another way, then do nothing
     if (router.route(request, response))
         return;
 
     if (request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
-        return response->setError(HttpStatus::BadRequest, "Request body content type must be application/json");
+        throw HttpException(HttpStatus::BadRequest, "Request body content type must be application/json");
 
     QJsonDocument jsonDocument = request->parseJsonBody();
     if (jsonDocument.isNull())
-        return response->setError(HttpStatus::BadRequest, "Invalid JSON body");
+        throw HttpException(HttpStatus::BadRequest, "Invalid JSON body");
 
     QJsonObject object;
     object["test"] = 5;
     object["another test"] = "OK";
 
     response->setStatus(HttpStatus::Ok, QJsonDocument(object));
+    // return QPromise<void>::resolve();
 }
 
-QPromise<void> RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-{
-    QString username = match.captured(1);
-    QJsonObject object;
+// QPromise<void> RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
+// {
+//     QString username = match.captured(1);
+//     QJsonObject object;
 
-    object["username"] = username;
+//     object["username"] = username;
 
-    response->setStatus(HttpStatus::Ok, QJsonDocument(object));
-}
+//     response->setStatus(HttpStatus::Ok, QJsonDocument(object));
+// }
 
 // QPromise<void> RequestHandler::handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
 // {
