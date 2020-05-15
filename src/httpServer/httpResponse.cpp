@@ -230,9 +230,10 @@ void HttpResponse::setupFromRequest(HttpRequest *request)
     if (status_ == HttpStatus::MethodNotAllowed && request)
     {
         // Combine the allowed methods into one string delineated by commas
-        headers["Allow"] = std::accumulate(request->allowedMethods.begin(), request->allowedMethods.end(), QString(""), [](const QString &str1, const QString &str2) {
-            return str1.isEmpty() ? str2 : str1 + ", " + str2;
-        });
+        headers["Allow"] = std::accumulate(request->allowedMethods.begin(), request->allowedMethods.end(), QString(""),
+            [](const QString str1, const QString str2) {
+                return str1.isEmpty() ? str2 : str1 + ", " + str2;
+            });
     }
 }
 

@@ -173,7 +173,7 @@ struct HttpException : public std::exception
 
 struct QStringCaseSensitiveHash
 {
-    size_t operator()(const QString &str) const
+    size_t operator()(const QString str) const
     {
         static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -184,7 +184,7 @@ struct QStringCaseSensitiveHash
 
 struct QStringCaseSensitiveEqual
 {
-    bool operator()(const QString &str1, const QString &str2) const
+    bool operator()(const QString str1, const QString str2) const
     {
         return str1.compare(str2, Qt::CaseSensitive) == 0;
     }
@@ -192,7 +192,7 @@ struct QStringCaseSensitiveEqual
 
 struct QStringCaseInsensitiveHash
 {
-    size_t operator()(const QString &str) const
+    size_t operator()(const QString str) const
     {
         static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -203,7 +203,7 @@ struct QStringCaseInsensitiveHash
 
 struct QStringCaseInSensitiveEqual
 {
-    bool operator()(const QString &str1, const QString &str2) const
+    bool operator()(const QString str1, const QString str2) const
     {
         return str1.compare(str2, Qt::CaseInsensitive) == 0;
     }
@@ -214,7 +214,7 @@ namespace std
     // Default hash and comparator for QString is case-sensitive
     template<> struct hash<QString>
     {
-        size_t operator()(const QString &str) const
+        size_t operator()(const QString str) const
         {
             static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -224,7 +224,7 @@ namespace std
 
     template<> struct equal_to<QString>
     {
-        bool operator()(const QString &str1, const QString &str2) const
+        bool operator()(const QString str1, const QString str2) const
         {
             return str1.compare(str2, Qt::CaseSensitive) == 0;
         }

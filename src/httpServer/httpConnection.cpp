@@ -208,7 +208,6 @@ void HttpConnection::socketDisconnected()
         qDebug().noquote() << QString("Client %1 disconnected").arg(address.toString());
 
     timeoutTimer->stop();
-
     emit disconnected();
 }
 
@@ -218,7 +217,7 @@ void HttpConnection::sslErrors(const QList<QSslError> &errors)
     {
         // Combine all the SSL error messages into one string delineated by commas
         QString errorMessages = std::accumulate(errors.begin(), errors.end(), QString(""),
-            [](const QString &str, const QSslError &error) {
+            [](const QString str, const QSslError &error) {
                 return str.isEmpty() ? error.errorString() : str + ", " + error.errorString();
             });
 
