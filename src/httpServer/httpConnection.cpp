@@ -89,6 +89,17 @@ void HttpConnection::read()
             {
                 requestHandler->handle(currentRequest, currentResponse)
                     .timeout(config->responseTimeout)
+                    .fail([](const QPromiseTimeoutException& error) {
+                        HttpResponse *response = it->first;
+
+                        // Dont emit finished signal
+                        currentResponse->setError(HttpStatus::RequestTimeout, "", false);
+                        currentResponse->prepareToSend();
+
+                        // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
+                        if (currentResponse == pendingResponses.front())
+                            bytesWritten(0);
+                    })
                     .finally([]() {
                         // TODO Done
                     });
@@ -98,27 +109,6 @@ void HttpConnection::read()
                 requestHandler->handle(currentRequest, currentResponse).finally([]() {
                     // TODO Done
                 });
-            }
-
-            try
-            {
-                const x = ;
-
-                requestHandler->handle(currentRequest, currentResponse).finally([]() {
-                    // TODO Done
-                });
-
-                // Block signals so that the finished signal is not called
-                currentResponse->blockSignals(true);
-                requestHandler->handle(currentRequest, currentResponse);
-                currentResponse->blockSignals(false);
-            }
-            catch (const std::exception &e)
-            {
-                currentResponse->setError(HttpStatus::InternalServerError, "An error occurred while processing request");
-
-                if (config->verbosity >= HttpServerConfig::Verbose::Warning)
-                    qWarning().noquote() << QString("Encountered an exception while attempting to parse request from %1: %2").arg(address.toString()).arg(e.what());
             }
         }
 
