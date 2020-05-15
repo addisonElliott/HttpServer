@@ -100,7 +100,10 @@ void HttpConnection::read()
                 .arg(currentRequest->uriStr()).arg(address.toString());
 
         // Handle request and setup timeout timer if necessary
-        auto promise = requestHandler->handle(currentRequest, currentResponse);
+        // Note: Wrap the handler in a promise so exceptions are handled correctly
+        auto promise = QPromise<void>::resolve().then([=]() {
+            return requestHandler->handle(currentRequest, currentResponse);
+        });
         if (config->responseTimeout > 0)
             promise = promise.timeout(config->responseTimeout);
 
