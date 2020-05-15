@@ -84,7 +84,8 @@ bool HttpRequest::parseRequestLine(QTcpSocket *socket, HttpResponse *response)
     // Remove whitespace from either ends of buffer
     buffer = buffer.trimmed();
 
-    // RFC2616 section 4.1 states that servers SHOULD ignore all empty lines since some buggy clients send extra lines after POST requests
+    // RFC2616 section 4.1 states that servers SHOULD ignore all empty lines since some buggy clients send extra
+    // lines after POST requests
     if (buffer.isEmpty())
         return true;
 
