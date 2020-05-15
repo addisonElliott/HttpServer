@@ -65,7 +65,7 @@ public:
             std::placeholders::_3));
     }
 
-    QPromise<void> route(HttpRequest *request, HttpResponse *response);
+    QPromise<void> route(HttpRequest *request, HttpResponse *response, bool *foundRoute = nullptr);
 };
 
 class httpRequestRouter

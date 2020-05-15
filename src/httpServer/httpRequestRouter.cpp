@@ -14,7 +14,7 @@ void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, Ht
     routes.push_back(route);
 }
 
-QPromise<void> HttpRequestRouter::route(HttpRequest *request, HttpResponse *response)
+QPromise<void> HttpRequestRouter::route(HttpRequest *request, HttpResponse *response, bool *foundRoute)
 {
     // Iterate through each route
     for (const HttpRequestRoute &route : routes)
@@ -25,9 +25,13 @@ QPromise<void> HttpRequestRouter::route(HttpRequest *request, HttpResponse *resp
 
         // Found one, call route handler and return
         if (methodMatch && regexMatch.hasMatch())
+        {
+            if (foundRoute) *foundRoute = true;
             return route.handler(regexMatch, request, response);
+        }
     }
 
     // No match found, defer back to handler
+    if (foundRoute) *foundRoute = false;
     return QPromise<void>::resolve();
 }
