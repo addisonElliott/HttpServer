@@ -52,17 +52,12 @@ bool HttpResponse::cookie(QString name, HttpCookie *cookie) const
     return true;
 }
 
-void HttpResponse::setStatus(HttpStatus status, bool finished_)
+void HttpResponse::setStatus(HttpStatus status)
 {
     status_ = status;
-
-    if (finished_)
-    {
-        emit finished();
-    }
 }
 
-void HttpResponse::setStatus(HttpStatus status, QByteArray body, QString contentType, bool finished_)
+void HttpResponse::setStatus(HttpStatus status, QByteArray body, QString contentType)
 {
     status_ = status;
     body_ = body;
@@ -73,37 +68,22 @@ void HttpResponse::setStatus(HttpStatus status, QByteArray body, QString content
 
     // Note that the content type here must contain the charset in addition since it cannot be deduced from the body
     setHeader("Content-Type", contentType);
-
-    if (finished_)
-    {
-        emit finished();
-    }
 }
 
-void HttpResponse::setStatus(HttpStatus status, QJsonDocument body, bool finished_)
+void HttpResponse::setStatus(HttpStatus status, QJsonDocument body)
 {
     status_ = status;
     body_ = body.toJson();
 
     setHeader("Content-Type", "application/json");
-
-    if (finished_)
-    {
-        emit finished();
-    }
 }
 
-void HttpResponse::setStatus(HttpStatus status, QString body, QString mimeType, bool finished_)
+void HttpResponse::setStatus(HttpStatus status, QString body, QString mimeType)
 {
     status_ = status;
     body_ = body.toUtf8();
 
     setHeader("Content-Type", mimeType + "; charset=utf-8");
-
-    if (finished_)
-    {
-        emit finished();
-    }
 }
 
 void HttpResponse::setBody(QByteArray body)
@@ -111,12 +91,7 @@ void HttpResponse::setBody(QByteArray body)
     body_ = body;
 }
 
-void HttpResponse::setFinished()
-{
-    emit finished();
-}
-
-void HttpResponse::setError(HttpStatus status, QString errorMessage, bool closeConnection, bool finished_)
+void HttpResponse::setError(HttpStatus status, QString errorMessage, bool closeConnection)
 {
     auto it = config->errorDocumentMap.find(status);
     if (it != config->errorDocumentMap.end())
@@ -129,7 +104,7 @@ void HttpResponse::setError(HttpStatus status, QString errorMessage, bool closeC
             data.replace("${statusCode}", QByteArray::number(int(status)));
             data.replace("${statusStr}", getHttpStatusStr(status).toUtf8());
 
-            setStatus(status, data, "", finished_);
+            setStatus(status, data, "");
 
             if (config->errorDocumentCacheTime > 0)
                 setHeader("Cache-Control", QString("max-age=%1").arg(config->errorDocumentCacheTime));
@@ -139,18 +114,18 @@ void HttpResponse::setError(HttpStatus status, QString errorMessage, bool closeC
             // Default to JSON object if we can't open the filename
             QJsonObject object;
             object["message"] = errorMessage;
-            setStatus(status, QJsonDocument(object), finished_);
+            setStatus(status, QJsonDocument(object));
         }
     }
     else if (!errorMessage.isEmpty())
     {
         QJsonObject object;
         object["message"] = errorMessage;
-        setStatus(status, QJsonDocument(object), finished_);
+        setStatus(status, QJsonDocument(object));
     }
     else
     {
-        setStatus(status, finished_);
+        setStatus(status);
     }
 
     // If close connection is false, leave the connection header alone to default to what the client sent (or keep-alive if client sends nothing)

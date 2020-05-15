@@ -42,9 +42,10 @@ private:
     void createSocket(qintptr socketDescriptor);
 
 public:
-    HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor, QSslConfiguration *sslConfig = nullptr, QObject *parent = nullptr);
+    HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor,
+        QSslConfiguration *sslConfig = nullptr, QObject *parent = nullptr);
     ~HttpConnection();
-	
+
 private slots:
     void read();
     void bytesWritten(qint64 bytes);

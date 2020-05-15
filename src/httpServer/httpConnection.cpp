@@ -85,8 +85,29 @@ void HttpConnection::read()
             if (config->verbosity >= HttpServerConfig::Verbose::Info)
                 qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
 
+            if (config->responseTimeout > 0)
+            {
+                requestHandler->handle(currentRequest, currentResponse)
+                    .timeout(config->responseTimeout)
+                    .finally([]() {
+                        // TODO Done
+                    });
+            }
+            else
+            {
+                requestHandler->handle(currentRequest, currentResponse).finally([]() {
+                    // TODO Done
+                });
+            }
+
             try
             {
+                const x = ;
+
+                requestHandler->handle(currentRequest, currentResponse).finally([]() {
+                    // TODO Done
+                });
+
                 // Block signals so that the finished signal is not called
                 currentResponse->blockSignals(true);
                 requestHandler->handle(currentRequest, currentResponse);
