@@ -81,6 +81,7 @@ void HttpConnection::read()
         // We are done parsing data, whether it be an error or not
         timeoutTimer->stop();
 
+        // If a response exists, then just send that, doesn't matter if its an error or not
         if (currentResponse->isValid())
         {
             currentResponse->setupFromRequest(currentRequest);
@@ -91,64 +92,49 @@ void HttpConnection::read()
 
             pendingResponses.push(currentResponse);
             currentResponse = nullptr;
-
-            // TODO Fix me....
             return;
         }
 
-        /*
+        if (config->verbosity >= HttpServerConfig::Verbose::Info)
+            qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method())
+                .arg(currentRequest->uriStr()).arg(address.toString());
 
-        TODO How to handle this?
+        // Handle request and setup timeout timer if necessary
+        auto promise = requestHandler->handle(currentRequest, currentResponse);
+        if (config->responseTimeout > 0)
+            promise = promise.timeout(config->responseTimeout);
 
-        So we will need to add it regardless it seems, even if it's a synchronous request...
-
-
-        */
-
-        // If a response exists, then just send that, doesn't matter if its an error or not
-        if (!currentResponse->isValid())
-        {
-            if (config->verbosity >= HttpServerConfig::Verbose::Info)
-                qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method())
-                    .arg(currentRequest->uriStr()).arg(address.toString());
-
-            // Handle request and setup timeout timer if necessary
-            auto promise = requestHandler->handle(currentRequest, currentResponse);
-            if (config->responseTimeout > 0)
-                promise = promise.timeout(config->responseTimeout);
-
-            promise
-                .fail([=](const QPromiseTimeoutException &error) {
-                    // Request timed out
-                    currentResponse->setError(HttpStatus::RequestTimeout, "", false);
-                })
-                .fail([=](const HttpException &error) {
-                    currentResponse->setError(error.status, error.message, false);
-                })
-                .fail([=](const std::exception &error) {
-                    currentResponse->setError(HttpStatus::InternalServerError, error.what(), false);
-                })
-                .finally([=]() {
-                    // Handle if no response is set
-                    // This should not happen, but handle it and warn the user
-                    if (!currentResponse->isValid())
+        promise
+            .fail([=](const QPromiseTimeoutException &error) {
+                // Request timed out
+                currentResponse->setError(HttpStatus::RequestTimeout, "", false);
+            })
+            .fail([=](const HttpException &error) {
+                currentResponse->setError(error.status, error.message, false);
+            })
+            .fail([=](const std::exception &error) {
+                currentResponse->setError(HttpStatus::InternalServerError, error.what(), false);
+            })
+            .finally([=]() {
+                // Handle if no response is set
+                // This should not happen, but handle it and warn the user
+                if (!currentResponse->isValid())
+                {
+                    if (config->verbosity >= HttpServerConfig::Verbose::Warning)
                     {
-                        if (config->verbosity >= HttpServerConfig::Verbose::Warning)
-                        {
-                            qWarning().noquote() << QString("No valid response set, defaulting to 500: %1 %2 %3")
-                                .arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
-                        }
-                        currentResponse->setError(HttpStatus::InternalServerError, "An unknown error occurred", false);
+                        qWarning().noquote() << QString("No valid response set, defaulting to 500: %1 %2 %3")
+                            .arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
                     }
+                    currentResponse->setError(HttpStatus::InternalServerError, "An unknown error occurred", false);
+                }
 
-                    // Send response
-                    currentResponse->prepareToSend();
+                // Send response
+                currentResponse->prepareToSend();
 
-                    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-                    if (currentResponse == pendingResponses.front())
-                        bytesWritten(0);
-                });
-        }
+                // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
+                if (currentResponse == pendingResponses.front())
+                    bytesWritten(0);
+            });
 
         currentResponse->setupFromRequest(currentRequest);
 
