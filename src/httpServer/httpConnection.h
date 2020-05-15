@@ -50,8 +50,6 @@ private slots:
     void read();
     void bytesWritten(qint64 bytes);
     void timeout();
-    void responseTimeout();
-    void responseFinished();
     void socketDisconnected();
     void sslErrors(const QList<QSslError> &errors);
 

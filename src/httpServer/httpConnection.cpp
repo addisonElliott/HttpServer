@@ -85,31 +85,28 @@ void HttpConnection::read()
             if (config->verbosity >= HttpServerConfig::Verbose::Info)
                 qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
 
+            // Handle request and setup timeout timer if necessary
+            auto promise = requestHandler->handle(currentRequest, currentResponse);
             if (config->responseTimeout > 0)
-            {
-                requestHandler->handle(currentRequest, currentResponse)
-                    .timeout(config->responseTimeout)
-                    .fail([](const QPromiseTimeoutException& error) {
-                        HttpResponse *response = it->first;
+                promise = promise.timeout(config->responseTimeout);
 
-                        // Dont emit finished signal
-                        currentResponse->setError(HttpStatus::RequestTimeout, "", false);
-                        currentResponse->prepareToSend();
+            promise
+                .fail([](const QPromiseTimeoutException& error) {
+                    // Request timed out
+                    currentResponse->setError(HttpStatus::RequestTimeout, "", false);
+                    currentResponse->prepareToSend();
 
-                        // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-                        if (currentResponse == pendingResponses.front())
-                            bytesWritten(0);
-                    })
-                    .finally([]() {
-                        // TODO Done
-                    });
-            }
-            else
-            {
-                requestHandler->handle(currentRequest, currentResponse).finally([]() {
-                    // TODO Done
+                    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
+                    if (currentResponse == pendingResponses.front())
+                        bytesWritten(0);
+                })
+                .finally([]() {
+                    currentResponse->prepareToSend();
+
+                    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
+                    if (currentResponse == pendingResponses.front())
+                        bytesWritten(0);
                 });
-            }
         }
 
         currentResponse->setupFromRequest(currentRequest);
@@ -228,67 +225,6 @@ void HttpConnection::timeout()
 
     // This will disconnect after all bytes have been written
     socket->disconnectFromHost();
-}
-
-void HttpConnection::responseTimeout()
-{
-    // Grab the timer that called this function and try to find the corresponding response by value in the responseTimers map
-    QTimer *timer = (QTimer *)QObject::sender();
-    auto it = std::find_if(responseTimers.begin(), responseTimers.end(), [timer](const std::pair<HttpResponse *, QTimer *> &x) { return x.second == timer; });
-
-    // If the response could not be found, then we just delete the timer and do nothing
-    // This should NEVER happen
-    //
-    // Otherwise, if the response has already been set, then it means we are currently sending the response
-    // It's very unlikely this will occur
-    if (it == responseTimers.end())
-    {
-        timer->deleteLater();
-        return;
-    }
-    else if (it->first->isValid())
-    {
-        timer->deleteLater();
-        responseTimers.erase(it);
-        return;
-    }
-
-    HttpResponse *response = it->first;
-
-    // This signal is used to notify the request handler to stop using the pointer because it's going to be deleted
-    emit response->cancelled();
-
-    // Dont emit finished signal
-    response->setError(HttpStatus::RequestTimeout, "", false, false);
-    response->prepareToSend();
-
-    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-    if (response == pendingResponses.front())
-        bytesWritten(0);
-
-    // Delete timer (the response will be deleted after it is sent)
-    timer->deleteLater();
-    responseTimers.erase(it);
-}
-
-void HttpConnection::responseFinished()
-{
-    // Retrieve the response that called finish
-    HttpResponse *response = (HttpResponse *)QObject::sender();
-
-    // Find the corresponding timer for the response and delete it
-    auto it = responseTimers.find(response);
-    if (it != responseTimers.end())
-    {
-        it->second->deleteLater();
-        responseTimers.erase(it);
-    }
-
-    response->prepareToSend();
-
-    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-    if (response == pendingResponses.front())
-        bytesWritten(0);
 }
 
 void HttpConnection::socketDisconnected()
