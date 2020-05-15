@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <list>
+#include <QtPromise>
 #include <vector>
 
 #include "httpRequest.h"
@@ -10,7 +11,9 @@
 #include "util.h"
 
 
-typedef std::function<void(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *)> HttpRequestMapFunction;
+using QtPromise::QPromise;
+
+typedef std::function<QPromise<void>(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *)> HttpRequestMapFunction;
 
 struct HttpRequestRoute
 {
@@ -31,34 +34,38 @@ public:
 
     // Allows registering member functions using addRoute(..., <CLASS>, &Class:memberFunction)
     template <typename T>
-    void addRoute(QString method, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
+    void addRoute(QString method, QString regex, T *inst,
+        QPromise<void> (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
     {
         return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));
     }
 
     template <typename T>
-    void addRoute(QString method, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
+    void addRoute(QString method, QString regex, T *inst,
+        QPromise<void> (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
     {
         return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));
     }
 
     template <typename T>
-    void addRoute(std::vector<QString> methods, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
+    void addRoute(std::vector<QString> methods, QString regex, T *inst,
+        QPromise<void> (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
     {
         return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));
     }
 
     template <typename T>
-    void addRoute(std::vector<QString> methods, QString regex, T *inst, void (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
+    void addRoute(std::vector<QString> methods, QString regex, T *inst,
+        QPromise<void> (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
     {
         return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3));
     }
 
-    bool route(HttpRequest *request, HttpResponse *response);
+    QPromise<void> route(HttpRequest *request, HttpResponse *response);
 };
 
 class httpRequestRouter
