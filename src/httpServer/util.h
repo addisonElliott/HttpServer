@@ -162,6 +162,15 @@ static const std::map<int, QString> httpStatusStrs {
     {511, "Network Authentication Required"}
 };
 
+struct HttpException : public std::exception
+{
+    const HttpStatus status;
+    const QString message;
+
+    HttpException(HttpStatus status) : status(status), message() {}
+    HttpException(HttpStatus status, QString message) : status(status), message(message) {}
+};
+
 struct QStringCaseSensitiveHash
 {
     size_t operator()(const QString &str) const

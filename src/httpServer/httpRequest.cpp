@@ -1,7 +1,8 @@
 #include "httpRequest.h"
 
-HttpRequest::HttpRequest(HttpServerConfig *config) : config(config), buffer(), requestBytesSize(0), state_(State::ReadRequestLine), method_(), uri_(), version_(),
-    expectedBodySize(0), body_(), mimeType_(), charset_(), boundary(), tmpFormData(nullptr)
+HttpRequest::HttpRequest(HttpServerConfig *config) : config(config), buffer(), requestBytesSize(0),
+    state_(State::ReadRequestLine), method_(), uri_(), version_(), expectedBodySize(0), body_(), mimeType_(),
+    charset_(), boundary(), tmpFormData(nullptr)
 {
 }
 
@@ -40,11 +41,12 @@ bool HttpRequest::parseRequest(QTcpSocket *socket, HttpResponse *response)
                 return true;
 
             case State::Abort:
-                // This state should only be reached when a fatal error occurs where the server cannot parse the request successfully
-                // Any minor errors or issues where the request can still be parsed successfully will go to the complete state still
+                // This state should only be reached when a fatal error occurs where the server cannot parse the
+                // request successfully. Any minor errors or issues where the request can still be parsed successfully
+                // will go to the complete state still
                 //
-                // It is unclear how much of the data in the socket buffer is meant for this request (HTTP/1.1 supports pipelining so multiple requests could be present).
-                // We take a gamble by just clearing all buffers
+                // It is unclear how much of the data in the socket buffer is meant for this request (HTTP/1.1 supports
+                // pipelining so multiple requests could be present). We take a gamble by just clearing all buffers
                 socket->readAll();
                 buffer.clear();
                 return true;
@@ -63,9 +65,13 @@ bool HttpRequest::parseRequestLine(QTcpSocket *socket, HttpResponse *response)
     if (requestBytesSize > config->maxRequestSize)
     {
         if (config->verbosity >= HttpServerConfig::Verbose::Info)
-            qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)").arg(socket->peerAddress().toString()).arg(config->maxRequestSize);
+        {
+            qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)")
+                .arg(socket->peerAddress().toString()).arg(config->maxRequestSize);
+        }
 
-        response->setError(HttpStatus::RequestHeaderFieldsTooLarge, QString("The request line was too large to parse (max size: %1").arg(config->maxRequestSize));
+        response->setError(HttpStatus::RequestHeaderFieldsTooLarge, QString("The request line was too large to parse "
+            "(max size: %1").arg(config->maxRequestSize));
         state_ = State::Abort;
         return true;
     }
@@ -89,7 +95,10 @@ bool HttpRequest::parseRequestLine(QTcpSocket *socket, HttpResponse *response)
     if (parts.length() != 3 || !parts[2].startsWith("HTTP"))
     {
         if (config->verbosity >= HttpServerConfig::Verbose::Info)
-            qInfo().noquote() << QString("Invalid HTTP request line received from %1: %2").arg(socket->peerAddress().toString()).arg(QString(parts.join(' ')));
+        {
+            qInfo().noquote() << QString("Invalid HTTP request line received from %1: %2").arg(socket->peerAddress().toString())
+                .arg(QString(parts.join(' ')));
+        }
 
         response->setError(HttpStatus::BadRequest, "Invalid HTTP request, invalid request line");
         state_ = State::Abort;
@@ -97,8 +106,10 @@ bool HttpRequest::parseRequestLine(QTcpSocket *socket, HttpResponse *response)
     }
 
     // RFC7230 section 3 states that a subset of ASCII character set must be used
-    // The obsolete RFC2616 required Latin1 character set but that has since been changed. The Latin1 requirement was a problem for header values when specifying certain characters.
-    // The implementation used here will be to utilize Latin1 when it's known that non-ASCII characters won't be used, and to read UTF-8 if non-ASCII characters are possible.
+    // The obsolete RFC2616 required Latin1 character set but that has since been changed. The Latin1 requirement was
+    // a problem for header values when specifying certain characters. The implementation used here will be to utilize
+    // Latin1 when it's known that non-ASCII characters won't be used, and to read UTF-8 if non-ASCII characters are
+    // possible.
     //
     // In the future, a configuration setting could be added to allow customization of the heading character set
     method_ = QString::fromLatin1(parts[0]);
@@ -150,9 +161,13 @@ bool HttpRequest::parseHeader(QTcpSocket *socket, HttpResponse *response)
     if (requestBytesSize > config->maxRequestSize)
     {
         if (config->verbosity >= HttpServerConfig::Verbose::Info)
-            qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)").arg(address_.toString()).arg(config->maxRequestSize);
+        {
+            qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)").arg(address_.toString())
+                .arg(config->maxRequestSize);
+        }
 
-        response->setError(HttpStatus::RequestHeaderFieldsTooLarge, QString("The headers were too large to parse (max size: %1").arg(config->maxRequestSize));
+        response->setError(HttpStatus::RequestHeaderFieldsTooLarge, QString("The headers were too large to parse "
+            "(max size: %1").arg(config->maxRequestSize));
         state_ = State::Abort;
         return true;
     }
@@ -187,9 +202,13 @@ bool HttpRequest::parseHeader(QTcpSocket *socket, HttpResponse *response)
             if (requestBytesSize + expectedBodySize > config->maxMultipartSize)
             {
                 if (config->verbosity >= HttpServerConfig::Verbose::Info)
-                    qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)").arg(address_.toString()).arg(config->maxMultipartSize);
+                {
+                    qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)")
+                        .arg(address_.toString()).arg(config->maxMultipartSize);
+                }
 
-                response->setError(HttpStatus::PayloadTooLarge, QString("The body is too large to parse (max size: %1)").arg(config->maxMultipartSize));
+                response->setError(HttpStatus::PayloadTooLarge, QString("The body is too large to parse (max size: %1)")
+                    .arg(config->maxMultipartSize));
                 state_ = State::Abort;
                 return true;
             }
@@ -203,9 +222,13 @@ bool HttpRequest::parseHeader(QTcpSocket *socket, HttpResponse *response)
             if (requestBytesSize + expectedBodySize > config->maxRequestSize)
             {
                 if (config->verbosity >= HttpServerConfig::Verbose::Info)
-                    qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)").arg(address_.toString()).arg(config->maxRequestSize);
+                {
+                    qInfo().noquote() << QString("Maximum size for request was reached for %1 (%2)")
+                        .arg(address_.toString()).arg(config->maxRequestSize);
+                }
 
-                response->setError(HttpStatus::PayloadTooLarge, QString("The body is too large to parse (max size: %1)").arg(config->maxRequestSize));
+                response->setError(HttpStatus::PayloadTooLarge, QString("The body is too large to parse (max size: %1)")
+                    .arg(config->maxRequestSize));
                 state_ = State::Abort;
                 return true;
             }
@@ -221,7 +244,10 @@ bool HttpRequest::parseHeader(QTcpSocket *socket, HttpResponse *response)
     if (index == -1)
     {
         if (config->verbosity >= HttpServerConfig::Verbose::Info)
-            qInfo().noquote() << QString("Invalid headers in request for %1 (%2)").arg(address_.toString()).arg(QString(buffer));
+        {
+            qInfo().noquote() << QString("Invalid headers in request for %1 (%2)").arg(address_.toString())
+                .arg(QString(buffer));
+        }
 
         response->setError(HttpStatus::BadRequest, "Invalid headers in request, must contain a field name and value");
         buffer.clear();
@@ -297,7 +323,8 @@ bool HttpRequest::parseBody(QTcpSocket *socket, HttpResponse *response)
                 qInfo() << "Unable to decompress GZIP request";
         }
 
-        // Since multipart/form-data requests are automatically buffered and parsed, we will parse URL encoded ones just to be consistent
+        // Since multipart/form-data requests are automatically buffered and parsed, we will parse URL encoded ones just
+        // to be consistent
         if (mimeType_ == "application/x-www-form-urlencoded")
             parsePostFormBody();
 
@@ -332,13 +359,14 @@ bool HttpRequest::parseMultiFormBody(QTcpSocket *socket, HttpResponse *response)
         if (index != -1)
         {
             // If there was existing format data, then we finish that up first
-            // If there was no existing form data, then this is the beginning of the multipart data, and if the index is not zero,
-            // this signals that the body did not start with a valid boundary
+            // If there was no existing form data, then this is the beginning of the multipart data, and if the index
+            // is not zero, this signals that the body did not start with a valid boundary
             if (tmpFormData)
             {
                 if (tmpFormData->file)
                 {
-                    // If the form data is a file, write the remainder of the file and set the position back to the beginning
+                    // If the form data is a file, write the remainder of the file and set the position back to
+                    // the beginning
                     QByteArray remainingData = buffer.left(index - 2);
                     tmpFormData->file->write(remainingData);
                     tmpFormData->file->seek(0);

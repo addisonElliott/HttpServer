@@ -1,7 +1,8 @@
 #include "httpConnection.h"
 
-HttpConnection::HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor, QSslConfiguration *sslConfig, QObject *parent) :
-    QObject(parent), config(config), currentRequest(nullptr), currentResponse(nullptr), requestHandler(requestHandler), sslConfig(sslConfig)
+HttpConnection::HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor,
+    QSslConfiguration *sslConfig, QObject *parent) : QObject(parent), config(config), currentRequest(nullptr),
+    currentResponse(nullptr), requestHandler(requestHandler), sslConfig(sslConfig)
 {
     timeoutTimer = new QTimer(this);
     keepAliveMode = false;
@@ -27,7 +28,8 @@ void HttpConnection::createSocket(qintptr socketDescriptor)
 
         // Use QOverload because there is another function sslErrors that causes issues
         // Any errors in TLS handshake will be notified via this signal
-        connect(sslSocket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this, &HttpConnection::sslErrors);
+        connect(sslSocket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this,
+            &HttpConnection::sslErrors);
 	}
     else
         socket = new QTcpSocket();
@@ -83,7 +85,8 @@ void HttpConnection::read()
         if (!currentResponse->isValid())
         {
             if (config->verbosity >= HttpServerConfig::Verbose::Info)
-                qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
+                qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method())
+                    .arg(currentRequest->uriStr()).arg(address.toString());
 
             // Handle request and setup timeout timer if necessary
             auto promise = requestHandler->handle(currentRequest, currentResponse);
@@ -129,7 +132,8 @@ void HttpConnection::read()
         {
             // We connect as a queued connection so that the function will be called on the next event loop. This allows additional instructions to be called
             // to the response before actually sending the data
-            connect(currentResponse, &HttpResponse::finished, this, &HttpConnection::responseFinished, Qt::QueuedConnection);
+            connect(currentResponse, &HttpResponse::finished, this, &HttpConnection::responseFinished,
+                Qt::QueuedConnection);
 
             // Save the request (delete after done sending response)
             requests.emplace(currentResponse, currentRequest);
@@ -148,8 +152,9 @@ void HttpConnection::bytesWritten(qint64 bytes)
     // Keep sending the responses until the buffer fills up
     while (!pendingResponses.empty())
     {
-        // If the response has not been prepared for sending, it means we're still waiting for a response from this
-        // Due to the setup of HTTP pipelining, we must send responses in the same order we received them, so we can't send anything else)
+        // If the response has not been prepared for sending, it means we're still waiting for a response
+        // from this. Due to the setup of HTTP pipelining, we must send responses in the same order we received them,
+        // so we can't send anything else)
         HttpResponse *response = pendingResponses.front();
         if (!response->isSending())
             break;
@@ -196,8 +201,8 @@ void HttpConnection::bytesWritten(qint64 bytes)
 
 void HttpConnection::timeout()
 {
-    // If we are in keep-alive mode (meaning this socket has already had one successful request) and there is no data that's been read,
-    // we just close the socket peacefully
+    // If we are in keep-alive mode (meaning this socket has already had one successful request) and there is no data
+    // that's been read, we just close the socket peacefully
     if (keepAliveMode && (!currentRequest || currentRequest->state() != HttpRequest::State::ReadRequestLine))
     {
         socket->disconnectFromHost();
@@ -233,10 +238,10 @@ void HttpConnection::sslErrors(const QList<QSslError> &errors)
     if (config->verbosity >= HttpServerConfig::Verbose::Warning)
     {
         // Combine all the SSL error messages into one string delineated by commas
-        QString errorMessages = std::accumulate(errors.begin(), errors.end(), QString(""), [](const QString &str, const QSslError &error)
-        {
-            return str.isEmpty() ? error.errorString() : str + ", " + error.errorString();
-        });
+        QString errorMessages = std::accumulate(errors.begin(), errors.end(), QString(""),
+            [](const QString &str, const QSslError &error) {
+                return str.isEmpty() ? error.errorString() : str + ", " + error.errorString();
+            });
 
         qWarning().noquote() << QString("TLS handshake failed for client %1: %2").arg(address.toString()).arg(errorMessages);
     }
