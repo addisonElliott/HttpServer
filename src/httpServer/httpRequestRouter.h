@@ -12,7 +12,7 @@
 #include "util.h"
 
 
-typedef std::function<HttpPromise(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *)> HttpRequestMapFunction;
+typedef std::function<HttpPromise(HttpData *)> HttpRequestMapFunction;
 
 struct HttpRequestRoute
 {
@@ -34,37 +34,33 @@ public:
     // Allows registering member functions using addRoute(..., <CLASS>, &Class:memberFunction)
     template <typename T>
     void addRoute(QString method, QString regex, T *inst,
-        HttpPromise (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
+        HttpPromise (T::*handler)(HttpData *data))
     {
-        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1));
     }
 
     template <typename T>
     void addRoute(QString method, QString regex, T *inst,
-        HttpPromise (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
+        HttpPromise (T::*handler)(HttpData *data) const)
     {
-        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        return addRoute(method, regex, std::bind(handler, inst, std::placeholders::_1));
     }
 
     template <typename T>
     void addRoute(std::vector<QString> methods, QString regex, T *inst,
-        HttpPromise (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *))
+        HttpPromise (T::*handler)(HttpData *data))
     {
-        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1));
     }
 
     template <typename T>
     void addRoute(std::vector<QString> methods, QString regex, T *inst,
-        HttpPromise (T::*handler)(const QRegularExpressionMatch &, HttpRequest *, HttpResponse *) const)
+        HttpPromise (T::*handler)(HttpData *data) const)
     {
-        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+        return addRoute(methods, regex, std::bind(handler, inst, std::placeholders::_1));
     }
 
-    HttpPromise route(HttpRequest *request, HttpResponse *response, bool *foundRoute = nullptr);
+    HttpPromise route(HttpData *data, bool *foundRoute = nullptr);
 };
 
 class httpRequestRouter

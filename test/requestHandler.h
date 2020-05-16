@@ -18,9 +18,9 @@ private:
 public:
     RequestHandler();
 
-    HttpPromise handle(HttpRequest *request, HttpResponse *response);
+    HttpPromise handle(HttpData *data);
 
-    HttpPromise handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
+//    HttpPromise handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
     // QPromise<void> handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
     // QPromise<void> handleFormTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
     // QPromise<void> handleFileTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);

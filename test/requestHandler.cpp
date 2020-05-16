@@ -2,7 +2,7 @@
 
 RequestHandler::RequestHandler()
 {
-    router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
+//    router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
     // router.addRoute({"GET", "POST"}, "^/gzipTest/?$", this, &RequestHandler::handleGzipTest);
     // router.addRoute({"GET", "POST"}, "^/formTest/?$", this, &RequestHandler::handleFormTest);
     // router.addRoute("GET", "^/fileTest/(\\d*)/?$", this, &RequestHandler::handleFileTest);
@@ -10,17 +10,19 @@ RequestHandler::RequestHandler()
     // router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
 }
 
-HttpPromise RequestHandler::handle(HttpRequest *request, HttpResponse *response)
+HttpPromise RequestHandler::handle(HttpData *data)
 {
+    // data->request
+
     qInfo() << "1.1";
     bool foundRoute;
-    QPromise<void> promise = router.route(request, response, &foundRoute);
-    qInfo() << "1.2" << foundRoute;
-    if (foundRoute)
-        return promise;
-    qInfo() << "1.3" << request;
+//    QPromise<void> promise = router.route(request, response, &foundRoute);
+//    qInfo() << "1.2" << foundRoute;
+//    if (foundRoute)
+//        return promise;
+//    qInfo() << "1.3" << data->request;
 
-    if (request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
+    if (data->request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
     {
         throw HttpException(HttpStatus::BadRequest, "Request body content type must be application/json");
         qInfo() << "1.3.1";
@@ -28,7 +30,7 @@ HttpPromise RequestHandler::handle(HttpRequest *request, HttpResponse *response)
 
     qInfo() << "1.4";
 
-    QJsonDocument jsonDocument = request->parseJsonBody();
+    QJsonDocument jsonDocument = data->request->parseJsonBody();
     if (jsonDocument.isNull())
         throw HttpException(HttpStatus::BadRequest, "Invalid JSON body");
     qInfo() << "1.5";
@@ -38,20 +40,20 @@ HttpPromise RequestHandler::handle(HttpRequest *request, HttpResponse *response)
     object["another test"] = "OK";
     qInfo() << "1.6";
 
-    response->setStatus(HttpStatus::Ok, QJsonDocument(object));
-    return QPromise<void>::resolve();
+    data->response->setStatus(HttpStatus::Ok, QJsonDocument(object));
+    return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-{
-    QString username = match.captured(1);
-    QJsonObject object;
+//HttpPromise RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
+//{
+//    QString username = match.captured(1);
+//    QJsonObject object;
 
-    object["username"] = username;
+//    object["username"] = username;
 
-    response->setStatus(HttpStatus::Ok, QJsonDocument(object));
-    return QPromise<void>::resolve();
-}
+//    response->setStatus(HttpStatus::Ok, QJsonDocument(object));
+//    return QPromise<void>::resolve();
+//}
 
 /*
  *

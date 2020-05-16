@@ -81,17 +81,16 @@ void HttpConnection::read()
         // We are done parsing data, whether it be an error or not
         timeoutTimer->stop();
 
+        // Store request & response in map while it is processed asynchronously
+        auto httpData = new HttpData(currentRequest, currentResponse);
+        data.emplace(currentResponse, httpData);
+        pendingResponses.push(currentResponse);
+
         // If a response exists, then just send that, doesn't matter if its an error or not
         if (currentResponse->isValid())
         {
             currentResponse->setupFromRequest(currentRequest);
-
-            // Create data pointer that is used to store all relevant data for a given request
-            auto httpData = new HttpData(currentRequest, currentResponse);
-            data.emplace(currentResponse, httpData);
             currentRequest = nullptr;
-
-            pendingResponses.push(currentResponse);
             currentResponse = nullptr;
             return;
         }
@@ -106,9 +105,9 @@ void HttpConnection::read()
         qInfo() << "2.1.1" << currentRequest << currentResponse;
         auto request = currentRequest;
         auto response = currentResponse;
-        auto promise = QPromise<void>::resolve().then([=]() {
+        auto promise = HttpPromise::resolve(httpData).then([=](HttpData *data) {
             qInfo() << "2.1" << request << response;
-            return requestHandler->handle(request, response);
+            return requestHandler->handle(data);
         });
         if (config->responseTimeout > 0)
         {
@@ -165,12 +164,8 @@ void HttpConnection::read()
 
         currentResponse->setupFromRequest(currentRequest);
 
-        // Create data pointer that is used to store all relevant data for a given request
-        auto httpData = new HttpData(currentRequest, currentResponse);
-        data.emplace(currentResponse, httpData);
+        // Clear pointers for next request
         currentRequest = nullptr;
-
-        pendingResponses.push(currentResponse);
         currentResponse = nullptr;
     }
 }

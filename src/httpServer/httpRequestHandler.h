@@ -16,7 +16,7 @@ class HTTPSERVER_EXPORT HttpRequestHandler : public QObject
 public:
     HttpRequestHandler(QObject *parent = nullptr) : QObject(parent) {}
 
-    virtual HttpPromise handle(HttpRequest *request, HttpResponse *response) = 0;
+    virtual HttpPromise handle(HttpData *data) = 0;
 };
 
 #endif // HTTP_REQUEST_HANDLER_H

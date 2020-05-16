@@ -14,24 +14,26 @@ void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, Ht
     routes.push_back(route);
 }
 
-HttpPromise HttpRequestRouter::route(HttpRequest *request, HttpResponse *response, bool *foundRoute)
+HttpPromise HttpRequestRouter::route(HttpData *data, bool *foundRoute)
 {
     // Iterate through each route
     for (const HttpRequestRoute &route : routes)
     {
         // Check for matching method and URI match
-        const bool methodMatch = std::find(route.methods.begin(), route.methods.end(), request->method()) != route.methods.end();
-        const QRegularExpressionMatch regexMatch = route.pathRegex.match(request->uriStr());
+        const bool methodMatch = std::find(route.methods.begin(), route.methods.end(), data->request->method()) != route.methods.end();
+        const QRegularExpressionMatch regexMatch = route.pathRegex.match(data->request->uriStr());
 
         // Found one, call route handler and return
         if (methodMatch && regexMatch.hasMatch())
         {
+            data->state["match"] = QVariant::fromValue(regexMatch);
+
             if (foundRoute) *foundRoute = true;
-            return route.handler(regexMatch, request, response);
+            return route.handler(data);
         }
     }
 
     // No match found, defer back to handler
     if (foundRoute) *foundRoute = false;
-    return QPromise<void>::resolve();
+    return HttpPromise::resolve(data);
 }
