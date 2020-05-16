@@ -3,11 +3,11 @@
 RequestHandler::RequestHandler()
 {
     router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
-    // router.addRoute({"GET", "POST"}, "^/gzipTest/?$", this, &RequestHandler::handleGzipTest);
-    // router.addRoute({"GET", "POST"}, "^/formTest/?$", this, &RequestHandler::handleFormTest);
-    // router.addRoute("GET", "^/fileTest/(\\d*)/?$", this, &RequestHandler::handleFileTest);
-    // router.addRoute("GET", "^/errorTest/(\\d*)/?$", this, &RequestHandler::handleErrorTest);
-    // router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
+    router.addRoute({"GET", "POST"}, "^/gzipTest/?$", this, &RequestHandler::handleGzipTest);
+    router.addRoute({"GET", "POST"}, "^/formTest/?$", this, &RequestHandler::handleFormTest);
+    router.addRoute("GET", "^/fileTest/(\\d*)/?$", this, &RequestHandler::handleFileTest);
+    router.addRoute("GET", "^/errorTest/(\\d*)/?$", this, &RequestHandler::handleErrorTest);
+    router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
 }
 
 HttpPromise RequestHandler::handle(HttpData *data)
@@ -55,138 +55,130 @@ HttpPromise RequestHandler::handleGetUsername(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
- HttpPromise RequestHandler::handleGzipTest(HttpData *data)
- {
-     QString output = "read 24 bytes \
-             read 24 bytes = 48 \
-             read 48 bytes = 96 \
-             read = \
-             \
-             \
-             \
-             1024 = min \
-             128 * 1024 = max \
-             \
-             compression = next power of two chunk size \
-             \
-             decompression = next power of two chunk size (data * 2) \
-             Just use that as the chunk size \
-             \
-             If only 16 bytes, then je";
+HttpPromise RequestHandler::handleGzipTest(HttpData *data)
+{
+    QString output = "read 24 bytes \
+            read 24 bytes = 48 \
+            read 48 bytes = 96 \
+            read = \
+            \
+            \
+            \
+            1024 = min \
+            128 * 1024 = max \
+            \
+            compression = next power of two chunk size \
+            \
+            decompression = next power of two chunk size (data * 2) \
+            Just use that as the chunk size \
+            \
+            If only 16 bytes, then je";
+    if (data->request->headerDefault("Content-Encoding", "") == "gzip")
+    {
+        qInfo() << data->request->parseBodyStr();
+    }
+    data->response->setStatus(HttpStatus::Ok, output, "text/plain");
+    data->response->compressBody();
+    return HttpPromise::resolve(data);
+}
 
-     if (data->request->headerDefault("Content-Encoding", "") == "gzip")
-     {
-         qInfo() << data->request->parseBodyStr();
-     }
+HttpPromise RequestHandler::handleFormTest(HttpData *data)
+{
+    auto formFields = data->request->formFields();
+    auto formFiles = data->request->formFiles();
+    for (auto kv : formFields)
+    {
+        qInfo().noquote() << QString("Field %1: %2").arg(kv.first).arg(kv.second);
+    }
+    for (auto kv : formFiles)
+    {
+        QByteArray data = kv.second.file->readAll();
+        qInfo().noquote() << QString("File %1 (%2) size=%3: %4").arg(kv.first).arg(kv.second.filename).arg(kv.second.file->size()).arg(QString(data));
+        kv.second.file->copy(QString("%1/Desktop/output/%2").arg(QDir::homePath()).arg(kv.second.filename));
+    }
+    data->response->setStatus(HttpStatus::Ok);
+    return HttpPromise::resolve(data);
+}
 
-     data->response->setStatus(HttpStatus::Ok, output, "text/plain");
-     data->response->compressBody();
-     return HttpPromise::resolve(data);
- }
+HttpPromise RequestHandler::handleFileTest(HttpData *data)
+{
+    auto match = data->state["match"].value<QRegularExpressionMatch>();
+    int id = match.captured(1).toInt();
 
- HttpPromise RequestHandler::handleFormTest(HttpData *data)
- {
-     auto formFields = data->request->formFields();
-     auto formFiles = data->request->formFiles();
+    switch (id)
+    {
+        case 1:
+            data->response->sendFile("data/404.html", "text/html", "utf-8");
+            break;
 
-     for (auto kv : formFields)
-     {
-         qInfo().noquote() << QString("Field %1: %2").arg(kv.first).arg(kv.second);
-     }
+        case 2:
+            data->response->sendFile("data/404.html", "text/html", "");
+            break;
 
-     for (auto kv : formFiles)
-     {
-         QByteArray data = kv.second.file->readAll();
-         qInfo().noquote() << QString("File %1 (%2) size=%3: %4").arg(kv.first).arg(kv.second.filename).arg(kv.second.file->size()).arg(QString(data));
+        case 3:
+            data->response->sendFile("data/404.html", "text/html", "", -1, Z_DEFAULT_COMPRESSION);
+            break;
 
-         kv.second.file->copy(QString("%1/Desktop/output/%2").arg(QDir::homePath()).arg(kv.second.filename));
-     }
+        case 4:
+            data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "colorPage.png");
+            break;
 
-     data->response->setStatus(HttpStatus::Ok);
-     return HttpPromise::resolve(data);
- }
+        case 5:
+            data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "colorPage.png");
+            break;
 
- HttpPromise RequestHandler::handleFileTest(HttpData *data)
- {
-     auto match = data->state["match"].value<QRegularExpressionMatch>();
-     int id = match.captured(1).toInt();
+        case 6:
+            data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "", 3600);
+            break;
 
-     switch (id)
-     {
-         case 1:
-             data->response->sendFile("data/404.html", "text/html", "utf-8");
-             break;
+        case 7:
+            data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "", 3600);
+            break;
 
-         case 2:
-             data->response->sendFile("data/404.html", "text/html", "");
-             break;
+        case 8:
+            data->response->sendFile("data/404.html", "text/html", "utf-8", 100);
+            break;
 
-         case 3:
-             data->response->sendFile("data/404.html", "text/html", "", -1, Z_DEFAULT_COMPRESSION);
-             break;
+        case 9:
+            data->response->sendFile("data/404.html");
+            break;
 
-         case 4:
-             data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "colorPage.png");
-             break;
+        case 10:
+            data->response->sendFile("data/404.html", "", "utf-8");
+            break;
 
-         case 5:
-             data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "colorPage.png");
-             break;
+        case 11:
+            data->response->sendFile("data/colorPage.png");
+            break;
 
-         case 6:
-             data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "", 3600);
-             break;
+        case 12:
+            data->response->sendFile("data/presentation.pptx");
+            break;
 
-         case 7:
-             data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "", 3600);
-             break;
+        default:
+            throw new HttpException(HttpStatus::BadRequest);
+    }
 
-         case 8:
-             data->response->sendFile("data/404.html", "text/html", "utf-8", 100);
-             break;
+    data->response->setStatus(HttpStatus::Ok);
+    return HttpPromise::resolve(data);
+}
 
-         case 9:
-             data->response->sendFile("data/404.html");
-             break;
+HttpPromise RequestHandler::handleErrorTest(HttpData *data)
+{
+    auto match = data->state["match"].value<QRegularExpressionMatch>();
+    int statusCode = match.captured(1).toInt();
+    HttpStatus status = (HttpStatus)statusCode;
+    data->response->setError(status, "There was an error here. Details go here");
+    return HttpPromise::resolve(data);
+}
 
-         case 10:
-             data->response->sendFile("data/404.html", "", "utf-8");
-             break;
-
-         case 11:
-             data->response->sendFile("data/colorPage.png");
-             break;
-
-         case 12:
-             data->response->sendFile("data/presentation.pptx");
-             break;
-
-         default:
-             throw new HttpException(HttpStatus::BadRequest);
-     }
-
-     data->response->setStatus(HttpStatus::Ok);
-     return HttpPromise::resolve(data);
- }
-
- HttpPromise RequestHandler::handleErrorTest(HttpData *data)
- {
-     auto match = data->state["match"].value<QRegularExpressionMatch>();
-     int statusCode = match.captured(1).toInt();
-     HttpStatus status = (HttpStatus)statusCode;
-
-     data->response->setError(status, "There was an error here. Details go here");
-     return HttpPromise::resolve(data);
- }
-
- HttpPromise RequestHandler::handleAsyncTest(HttpData *data)
- {
-     auto match = data->state["match"].value<QRegularExpressionMatch>();
-     int delay = match.captured(1).toInt();
-
-     return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpData *data) {
-         qInfo() << "Timeout reached";
-         data->response->setStatus(HttpStatus::Ok);
-         return HttpPromise::resolve(data);
-     });
- }
+HttpPromise RequestHandler::handleAsyncTest(HttpData *data)
+{
+    auto match = data->state["match"].value<QRegularExpressionMatch>();
+    int delay = match.captured(1).toInt();
+    return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpData *data) {
+        qInfo() << "Timeout reached";
+        data->response->setStatus(HttpStatus::Ok);
+        return HttpPromise::resolve(data);
+    });
+}
