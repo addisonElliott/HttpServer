@@ -26,6 +26,7 @@ HttpPromise HttpRequestRouter::route(HttpData *data, bool *foundRoute)
         // Found one, call route handler and return
         if (methodMatch && regexMatch.hasMatch())
         {
+            data->state["matches"] = regexMatch.capturedTexts();
             data->state["match"] = QVariant::fromValue(regexMatch);
 
             if (foundRoute) *foundRoute = true;
