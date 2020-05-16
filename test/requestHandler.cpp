@@ -2,7 +2,7 @@
 
 RequestHandler::RequestHandler()
 {
-//    router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
+    router.addRoute("GET", "^/users/(\\w*)/?$", this, &RequestHandler::handleGetUsername);
     // router.addRoute({"GET", "POST"}, "^/gzipTest/?$", this, &RequestHandler::handleGzipTest);
     // router.addRoute({"GET", "POST"}, "^/formTest/?$", this, &RequestHandler::handleFormTest);
     // router.addRoute("GET", "^/fileTest/(\\d*)/?$", this, &RequestHandler::handleFileTest);
@@ -16,16 +16,15 @@ HttpPromise RequestHandler::handle(HttpData *data)
 
     qInfo() << "1.1";
     bool foundRoute;
-//    QPromise<void> promise = router.route(request, response, &foundRoute);
-//    qInfo() << "1.2" << foundRoute;
-//    if (foundRoute)
-//        return promise;
-//    qInfo() << "1.3" << data->request;
+    HttpPromise promise = router.route(data, &foundRoute);
+    qInfo() << "1.2" << foundRoute;
+    if (foundRoute)
+        return promise;
+    qInfo() << "1.3" << data->request;
 
     if (data->request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
     {
         throw HttpException(HttpStatus::BadRequest, "Request body content type must be application/json");
-        qInfo() << "1.3.1";
     }
 
     qInfo() << "1.4";
@@ -44,174 +43,150 @@ HttpPromise RequestHandler::handle(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-//HttpPromise RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-//{
-//    QString username = match.captured(1);
-//    QJsonObject object;
+HttpPromise RequestHandler::handleGetUsername(HttpData *data)
+{
+    auto match = data->state["match"].value<QRegularExpressionMatch>();
+    QString username = match.captured(1);
+    QJsonObject object;
 
-//    object["username"] = username;
+    object["username"] = username;
 
-//    response->setStatus(HttpStatus::Ok, QJsonDocument(object));
-//    return QPromise<void>::resolve();
-//}
+    data->response->setStatus(HttpStatus::Ok, QJsonDocument(object));
+    return HttpPromise::resolve(data);
+}
 
-/*
- *
- * HttpData data = {match, request, response, state};
- *
- * return handleCORS(data).then(handleVerifyJson(data))
- *
- * QPromise<void> handleCORS(HttpData data)
- * {
- *      return QPromise::attempt([]() {
- *          // Logic here...
- *      });
- *
- * Could pass around the HttpData in the promise but then that doesn't make a lot of sense does it?
- *
- *
- * Oh yeah, so the HttpData needs to be stored as a pointer too. The reason why is because of the state really. Although it does suck to have to have a double indirection for the request/response.
- * }
- *
- */
+ HttpPromise RequestHandler::handleGzipTest(HttpData *data)
+ {
+     QString output = "read 24 bytes \
+             read 24 bytes = 48 \
+             read 48 bytes = 96 \
+             read = \
+             \
+             \
+             \
+             1024 = min \
+             128 * 1024 = max \
+             \
+             compression = next power of two chunk size \
+             \
+             decompression = next power of two chunk size (data * 2) \
+             Just use that as the chunk size \
+             \
+             If only 16 bytes, then je";
 
-// QPromise<void> RequestHandler::handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-// {
-//     QString output = "read 24 bytes \
-//             read 24 bytes = 48 \
-//             read 48 bytes = 96 \
-//             read = \
-//             \
-//             \
-//             \
-//             1024 = min \
-//             128 * 1024 = max \
-//             \
-//             compression = next power of two chunk size \
-//             \
-//             decompression = next power of two chunk size (data * 2) \
-//             Just use that as the chunk size \
-//             \
-//             If only 16 bytes, then je";
+     if (data->request->headerDefault("Content-Encoding", "") == "gzip")
+     {
+         qInfo() << data->request->parseBodyStr();
+     }
 
-//     if (request->headerDefault("Content-Encoding", "") == "gzip")
-//     {
-//         qInfo() << request->parseBodyStr();
-//     }
+     data->response->setStatus(HttpStatus::Ok, output, "text/plain");
+     data->response->compressBody();
+     return HttpPromise::resolve(data);
+ }
 
-//     response->setStatus(HttpStatus::Ok, output, "text/plain");
-//     response->compressBody();
-// }
+ HttpPromise RequestHandler::handleFormTest(HttpData *data)
+ {
+     auto formFields = data->request->formFields();
+     auto formFiles = data->request->formFiles();
 
-// QPromise<void> RequestHandler::handleFormTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-// {
-//     auto formFields = request->formFields();
-//     auto formFiles = request->formFiles();
+     for (auto kv : formFields)
+     {
+         qInfo().noquote() << QString("Field %1: %2").arg(kv.first).arg(kv.second);
+     }
 
-//     for (auto kv : formFields)
-//     {
-//         qInfo().noquote() << QString("Field %1: %2").arg(kv.first).arg(kv.second);
-//     }
+     for (auto kv : formFiles)
+     {
+         QByteArray data = kv.second.file->readAll();
+         qInfo().noquote() << QString("File %1 (%2) size=%3: %4").arg(kv.first).arg(kv.second.filename).arg(kv.second.file->size()).arg(QString(data));
 
-//     for (auto kv : formFiles)
-//     {
-//         QByteArray data = kv.second.file->readAll();
-//         qInfo().noquote() << QString("File %1 (%2) size=%3: %4").arg(kv.first).arg(kv.second.filename).arg(kv.second.file->size()).arg(QString(data));
+         kv.second.file->copy(QString("%1/Desktop/output/%2").arg(QDir::homePath()).arg(kv.second.filename));
+     }
 
-//         kv.second.file->copy(QString("%1/Desktop/output/%2").arg(QDir::homePath()).arg(kv.second.filename));
-//     }
+     data->response->setStatus(HttpStatus::Ok);
+     return HttpPromise::resolve(data);
+ }
 
-//     response->setStatus(HttpStatus::Ok);
-// }
+ HttpPromise RequestHandler::handleFileTest(HttpData *data)
+ {
+     auto match = data->state["match"].value<QRegularExpressionMatch>();
+     int id = match.captured(1).toInt();
 
-// QPromise<void> RequestHandler::handleFileTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-// {
-//     int id = match.captured(1).toInt();
+     switch (id)
+     {
+         case 1:
+             data->response->sendFile("data/404.html", "text/html", "utf-8");
+             break;
 
-//     switch (id)
-//     {
-//         case 1:
-//             response->sendFile("data/404.html", "text/html", "utf-8");
-//             break;
+         case 2:
+             data->response->sendFile("data/404.html", "text/html", "");
+             break;
 
-//         case 2:
-//             response->sendFile("data/404.html", "text/html", "");
-//             break;
+         case 3:
+             data->response->sendFile("data/404.html", "text/html", "", -1, Z_DEFAULT_COMPRESSION);
+             break;
 
-//         case 3:
-//             response->sendFile("data/404.html", "text/html", "", -1, Z_DEFAULT_COMPRESSION);
-//             break;
+         case 4:
+             data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "colorPage.png");
+             break;
 
-//         case 4:
-//             response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "colorPage.png");
-//             break;
+         case 5:
+             data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "colorPage.png");
+             break;
 
-//         case 5:
-//             response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "colorPage.png");
-//             break;
+         case 6:
+             data->response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "", 3600);
+             break;
 
-//         case 6:
-//             response->sendFile("data/colorPage.png", "image/png", "", -1, -2, "", 3600);
-//             break;
+         case 7:
+             data->response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "", 3600);
+             break;
 
-//         case 7:
-//             response->sendFile("data/colorPage.png", "image/png", "", -1, Z_DEFAULT_COMPRESSION, "", 3600);
-//             break;
+         case 8:
+             data->response->sendFile("data/404.html", "text/html", "utf-8", 100);
+             break;
 
-//         case 8:
-//             response->sendFile("data/404.html", "text/html", "utf-8", 100);
-//             break;
+         case 9:
+             data->response->sendFile("data/404.html");
+             break;
 
-//         case 9:
-//             response->sendFile("data/404.html");
-//             break;
+         case 10:
+             data->response->sendFile("data/404.html", "", "utf-8");
+             break;
 
-//         case 10:
-//             response->sendFile("data/404.html", "", "utf-8");
-//             break;
+         case 11:
+             data->response->sendFile("data/colorPage.png");
+             break;
 
-//         case 11:
-//             response->sendFile("data/colorPage.png");
-//             break;
+         case 12:
+             data->response->sendFile("data/presentation.pptx");
+             break;
 
-//         case 12:
-//             response->sendFile("data/presentation.pptx");
-//             break;
+         default:
+             throw new HttpException(HttpStatus::BadRequest);
+     }
 
-//         default:
-//             response->setError(HttpStatus::BadRequest);
-//             return;
-//     }
+     data->response->setStatus(HttpStatus::Ok);
+     return HttpPromise::resolve(data);
+ }
 
-//     response->setStatus(HttpStatus::Ok);
-// }
+ HttpPromise RequestHandler::handleErrorTest(HttpData *data)
+ {
+     auto match = data->state["match"].value<QRegularExpressionMatch>();
+     int statusCode = match.captured(1).toInt();
+     HttpStatus status = (HttpStatus)statusCode;
 
-// QPromise<void> RequestHandler::handleErrorTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-// {
-//     int statusCode = match.captured(1).toInt();
-//     HttpStatus status = (HttpStatus)statusCode;
+     data->response->setError(status, "There was an error here. Details go here");
+     return HttpPromise::resolve(data);
+ }
 
-//     response->setError(status, "There was an error here. Details go here");
-// }
+ HttpPromise RequestHandler::handleAsyncTest(HttpData *data)
+ {
+     auto match = data->state["match"].value<QRegularExpressionMatch>();
+     int delay = match.captured(1).toInt();
 
-// QPromise<void> RequestHandler::handleAsyncTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
-// {
-//     int delay = match.captured(1).toInt();
-//     QTimer *timer = new QTimer(this);
-
-//     connect(response, &HttpResponse::cancelled, [=]() {
-//         qInfo() << "Response was cancelled, stopping timer";
-
-//         // Deleting timer will cancel it so it won't be called
-//         delete timer;
-//     });
-
-//     connect(timer, &QTimer::timeout, [=]() {
-//         qInfo() << "Timeout reached";
-
-//         delete timer;
-//         response->setStatus(HttpStatus::Ok);
-//     });
-
-//     timer->start(delay * 1000);
-// }
+     return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpData *data) {
+         qInfo() << "Timeout reached";
+         data->response->setStatus(HttpStatus::Ok);
+         return HttpPromise::resolve(data);
+     });
+ }

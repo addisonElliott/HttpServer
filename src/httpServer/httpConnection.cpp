@@ -121,17 +121,21 @@ void HttpConnection::read()
                 qInfo() << "2.4";
                 // Request timed out
                 response->setError(HttpStatus::RequestTimeout, "", false);
+                //
+                return nullptr;
                 qInfo() << "2.5";
             })
             .fail([=](const HttpException &error) {
                 qInfo() << "2.6";
                 response->setError(error.status, error.message, false);
                 qInfo() << "2.7";
+                return nullptr;
             })
             .fail([=](const std::exception &error) {
                 qInfo() << "2.8";
                 response->setError(HttpStatus::InternalServerError, error.what(), false);
                 qInfo() << "2.9";
+                return nullptr;
             })
             .finally([=]() {
                 qInfo() << "2.10";

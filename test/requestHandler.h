@@ -20,12 +20,12 @@ public:
 
     HttpPromise handle(HttpData *data);
 
-//    HttpPromise handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    // QPromise<void> handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    // QPromise<void> handleFormTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    // QPromise<void> handleFileTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    // QPromise<void> handleErrorTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    // QPromise<void> handleAsyncTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
+    HttpPromise handleGetUsername(HttpData *data);
+    HttpPromise handleGzipTest(HttpData *data);
+    HttpPromise handleFormTest(HttpData *data);
+    HttpPromise handleFileTest(HttpData *data);
+    HttpPromise handleErrorTest(HttpData *data);
+    HttpPromise handleAsyncTest(HttpData *data);
 };
 
 #endif // REQUESTHANDLER_H
