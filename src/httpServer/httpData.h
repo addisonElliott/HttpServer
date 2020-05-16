@@ -1,6 +1,8 @@
 #ifndef HTTPDATA_H
 #define HTTPDATA_H
 
+#include "util.h"
+
 #include <unordered_map>
 #include <QString>
 #include <QVariant>

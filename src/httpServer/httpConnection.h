@@ -16,6 +16,7 @@
 #include <QTimer>
 #include <QtPromise>
 #include <queue>
+#include <unordered_map>
 
 
 using QtPromise::QPromiseTimeoutException;

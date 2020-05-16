@@ -3,9 +3,9 @@
 
 #include <QtPromise>
 
+#include "util.h"
 #include "httpRequest.h"
 #include "httpResponse.h"
-#include "util.h"
 
 
 using QtPromise::QPromise;
