@@ -63,10 +63,4 @@ public:
     HttpPromise route(HttpData *data, bool *foundRoute = nullptr);
 };
 
-class httpRequestRouter
-{
-public:
-    httpRequestRouter();
-};
-
 #endif // HTTP_REQUEST_ROUTER_H
