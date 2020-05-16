@@ -63,16 +63,16 @@ unix {
     INSTALLS += headers target strip
 
     CONFIG(debug, debug|release) {
-        mkpath($$PWD/debug)
+        mkpath($$PWD/build/debug)
 
-        DESTDIR = $$PWD/debug
-        OBJECTS_DIR = $$PWD/debug
+        DESTDIR = $$PWD/build/debug
+        OBJECTS_DIR = $$PWD/build/debug
     }
 
     CONFIG(release, debug|release) {
-        mkpath($$PWD/release)
+        mkpath($$PWD/build/release)
 
-        DESTDIR = $$PWD/release
-        OBJECTS_DIR = $$PWD/release
+        DESTDIR = $$PWD/build/release
+        OBJECTS_DIR = $$PWD/build/release
     }
 }
