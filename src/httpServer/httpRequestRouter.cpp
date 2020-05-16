@@ -14,7 +14,7 @@ void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, Ht
     routes.push_back(route);
 }
 
-QPromise<void> HttpRequestRouter::route(HttpRequest *request, HttpResponse *response, bool *foundRoute)
+HttpPromise HttpRequestRouter::route(HttpRequest *request, HttpResponse *response, bool *foundRoute)
 {
     // Iterate through each route
     for (const HttpRequestRoute &route : routes)

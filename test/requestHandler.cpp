@@ -10,7 +10,7 @@ RequestHandler::RequestHandler()
     // router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
 }
 
-QPromise<void> RequestHandler::handle(HttpRequest *request, HttpResponse *response)
+HttpPromise RequestHandler::handle(HttpRequest *request, HttpResponse *response)
 {
     qInfo() << "1.1";
     bool foundRoute;
@@ -42,7 +42,7 @@ QPromise<void> RequestHandler::handle(HttpRequest *request, HttpResponse *respon
     return QPromise<void>::resolve();
 }
 
-QPromise<void> RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
+HttpPromise RequestHandler::handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
 {
     QString username = match.captured(1);
     QJsonObject object;

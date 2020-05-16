@@ -34,6 +34,7 @@ SOURCES += \
         httpServer/util.cpp
 
 HEADERS += \
+        httpServer/const.h \
         httpServer/httpConnection.h \
         httpServer/httpCookie.h \
         httpServer/httpData.h \

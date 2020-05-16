@@ -3,12 +3,11 @@
 
 #include <QtPromise>
 
-#include "util.h"
+#include "const.h"
+#include "httpData.h"
 #include "httpRequest.h"
 #include "httpResponse.h"
 
-
-using QtPromise::QPromise;
 
 class HTTPSERVER_EXPORT HttpRequestHandler : public QObject
 {
@@ -17,7 +16,7 @@ class HTTPSERVER_EXPORT HttpRequestHandler : public QObject
 public:
     HttpRequestHandler(QObject *parent = nullptr) : QObject(parent) {}
 
-    virtual QPromise<void> handle(HttpRequest *request, HttpResponse *response) = 0;
+    virtual HttpPromise handle(HttpRequest *request, HttpResponse *response) = 0;
 };
 
 #endif // HTTP_REQUEST_HANDLER_H

@@ -19,7 +19,6 @@
 #include <unordered_map>
 
 
-using QtPromise::QPromiseTimeoutException;
 
 class HTTPSERVER_EXPORT HttpConnection : public QObject
 {
