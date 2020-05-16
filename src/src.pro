@@ -36,6 +36,7 @@ SOURCES += \
 HEADERS += \
         httpServer/httpConnection.h \
         httpServer/httpCookie.h \
+        httpServer/httpData.h \
         httpServer/httpRequest.h \
         httpServer/httpRequestHandler.h \
         httpServer/httpRequestRouter.h \

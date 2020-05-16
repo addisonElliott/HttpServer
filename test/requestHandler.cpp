@@ -53,6 +53,26 @@ QPromise<void> RequestHandler::handleGetUsername(const QRegularExpressionMatch &
     return QPromise<void>::resolve();
 }
 
+/*
+ *
+ * HttpData data = {match, request, response, state};
+ *
+ * return handleCORS(data).then(handleVerifyJson(data))
+ *
+ * QPromise<void> handleCORS(HttpData data)
+ * {
+ *      return QPromise::attempt([]() {
+ *          // Logic here...
+ *      });
+ *
+ * Could pass around the HttpData in the promise but then that doesn't make a lot of sense does it?
+ *
+ *
+ * Oh yeah, so the HttpData needs to be stored as a pointer too. The reason why is because of the state really. Although it does suck to have to have a double indirection for the request/response.
+ * }
+ *
+ */
+
 // QPromise<void> RequestHandler::handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response)
 // {
 //     QString output = "read 24 bytes \

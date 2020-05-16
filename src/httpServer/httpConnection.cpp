@@ -86,8 +86,9 @@ void HttpConnection::read()
         {
             currentResponse->setupFromRequest(currentRequest);
 
-            // Save the request (delete after done sending response)
-            requests.emplace(currentResponse, currentRequest);
+            // Create data pointer that is used to store all relevant data for a given request
+            auto httpData = new HttpData(currentRequest, currentResponse);
+            data.emplace(currentResponse, httpData);
             currentRequest = nullptr;
 
             pendingResponses.push(currentResponse);
@@ -164,8 +165,9 @@ void HttpConnection::read()
 
         currentResponse->setupFromRequest(currentRequest);
 
-        // Save the request (delete after done sending response)
-        requests.emplace(currentResponse, currentRequest);
+        // Create data pointer that is used to store all relevant data for a given request
+        auto httpData = new HttpData(currentRequest, currentResponse);
+        data.emplace(currentResponse, httpData);
         currentRequest = nullptr;
 
         pendingResponses.push(currentResponse);
@@ -200,11 +202,12 @@ void HttpConnection::bytesWritten(qint64 bytes)
         closeConnection |= connection.contains("close", Qt::CaseInsensitive);
 
         // Delete the corresponding request for the response
-        auto it = requests.find(response);
-        if (it != requests.end())
+        auto it = data.find(response);
+        if (it != data.end())
         {
+            delete it->second->request;
             delete it->second;
-            requests.erase(it);
+            data.erase(it);
         }
 
         // Delete response and pop from queue
@@ -290,9 +293,12 @@ HttpConnection::~HttpConnection()
     }
 
     // Delete pending requests
-    for (auto it : requests)
+    for (auto it : data)
+    {
+        delete it.second->request;
         delete it.second;
-    requests.clear();
+    }
+    data.clear();
 
     if (currentRequest)
     {

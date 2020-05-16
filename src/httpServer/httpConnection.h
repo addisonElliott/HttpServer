@@ -1,6 +1,7 @@
 #ifndef HTTP_CONNECTION_H
 #define HTTP_CONNECTION_H
 
+#include "httpData.h"
 #include "httpServerConfig.h"
 #include "httpRequest.h"
 #include "httpRequestHandler.h"
@@ -36,8 +37,8 @@ private:
     HttpRequestHandler *requestHandler;
     // Responses are stored in a queue to support HTTP pipelining and sending multiple responses
     std::queue<HttpResponse *> pendingResponses;
-    // Requests are stored and are deleted once the response is sent, this enables asynchronous logic
-    std::unordered_map<HttpResponse *, HttpRequest *> requests;
+    // Store data for each request to enable asynchronous logic
+    std::unordered_map<HttpResponse *, HttpData *> data;
 
     const QSslConfiguration *sslConfig;
 
