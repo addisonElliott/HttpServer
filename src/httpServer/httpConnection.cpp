@@ -102,68 +102,48 @@ void HttpConnection::read()
         // Handle request and setup timeout timer if necessary
         // Note: Wrap the handler in a promise so exceptions are handled correctly
         // Note: Create local copies of current request and response so they are captured by value in the lambda
-        qInfo() << "2.1.1" << currentRequest << currentResponse;
         auto request = currentRequest;
         auto response = currentResponse;
         auto promise = HttpPromise::resolve(httpData).then([=](HttpData *data) {
-            qInfo() << "2.1" << request << response;
             return requestHandler->handle(data);
         });
         if (config->responseTimeout > 0)
-        {
-            qInfo() << "2.2";
             promise = promise.timeout(config->responseTimeout);
-            qInfo() << "2.3";
-        }
 
         promise
             .fail([=](const QPromiseTimeoutException &error) {
-                qInfo() << "2.4";
                 // Request timed out
                 response->setError(HttpStatus::RequestTimeout, "", false);
                 //
                 return nullptr;
-                qInfo() << "2.5";
             })
             .fail([=](const HttpException &error) {
-                qInfo() << "2.6";
                 response->setError(error.status, error.message, false);
-                qInfo() << "2.7";
                 return nullptr;
             })
             .fail([=](const std::exception &error) {
-                qInfo() << "2.8";
                 response->setError(HttpStatus::InternalServerError, error.what(), false);
-                qInfo() << "2.9";
                 return nullptr;
             })
             .finally([=]() {
-                qInfo() << "2.10";
                 // Handle if no response is set
                 // This should not happen, but handle it and warn the user
                 if (!response->isValid())
                 {
-                    qInfo() << "2.11" << config;
                     if (config->verbosity >= HttpServerConfig::Verbose::Warning)
                     {
-                        qInfo() << "2.11.1";
                         qWarning().noquote() << QString("No valid response set, defaulting to 500: %1 %2 %3")
                             .arg(request->method()).arg(request->uriStr()).arg(address.toString());
                     }
-                    qInfo() << "2.11.2";
                     response->setError(HttpStatus::InternalServerError, "An unknown error occurred", false);
-                    qInfo() << "2.11.3";
                 }
-                qInfo() << "2.12";
 
                 // Send response
                 response->prepareToSend();
-                qInfo() << "2.13";
 
                 // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
                 if (response == pendingResponses.front())
                     bytesWritten(0);
-                qInfo() << "2.14";
             });
 
         currentResponse->setupFromRequest(currentRequest);

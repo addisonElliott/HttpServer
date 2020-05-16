@@ -12,30 +12,23 @@ RequestHandler::RequestHandler()
 
 HttpPromise RequestHandler::handle(HttpData *data)
 {
-    qInfo() << "1.1";
     bool foundRoute;
     HttpPromise promise = router.route(data, &foundRoute);
-    qInfo() << "1.2" << foundRoute;
     if (foundRoute)
         return promise;
-    qInfo() << "1.3" << data->request;
 
     if (data->request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
     {
         throw HttpException(HttpStatus::BadRequest, "Request body content type must be application/json");
     }
 
-    qInfo() << "1.4";
-
     QJsonDocument jsonDocument = data->request->parseJsonBody();
     if (jsonDocument.isNull())
         throw HttpException(HttpStatus::BadRequest, "Invalid JSON body");
-    qInfo() << "1.5";
 
     QJsonObject object;
     object["test"] = 5;
     object["another test"] = "OK";
-    qInfo() << "1.6";
 
     data->response->setStatus(HttpStatus::Ok, QJsonDocument(object));
     return HttpPromise::resolve(data);
