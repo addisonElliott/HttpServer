@@ -12,8 +12,6 @@ RequestHandler::RequestHandler()
 
 HttpPromise RequestHandler::handle(HttpData *data)
 {
-    // data->request
-
     qInfo() << "1.1";
     bool foundRoute;
     HttpPromise promise = router.route(data, &foundRoute);
