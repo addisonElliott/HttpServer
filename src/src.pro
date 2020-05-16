@@ -52,27 +52,27 @@ win32: LIBS += -lzlib
 unix: LIBS += -lz
 
 unix {
-        QMAKE_STRIP =
+    QMAKE_STRIP =
 
-        headers.path = /usr/local/include/httpServer
-        headers.files = $$HEADERS
+    headers.path = /usr/local/include/httpServer
+    headers.files = $$HEADERS
     target.path = /usr/local/lib
-        strip.path = /usr/local/lib
-        strip.commands = strip --strip-unneeded /usr/local/lib/$(TARGET)
-        strip.depends = install_headers install_target
-        INSTALLS += headers target strip
+    strip.path = /usr/local/lib
+    strip.commands = strip --strip-unneeded /usr/local/lib/$(TARGET)
+    strip.depends = install_headers install_target
+    INSTALLS += headers target strip
 
-        CONFIG(debug, debug|release) {
-                mkpath($$PWD/debug)
+    CONFIG(debug, debug|release) {
+        mkpath($$PWD/debug)
 
-                DESTDIR = $$PWD/debug
-                OBJECTS_DIR = $$PWD/debug
-        }
+        DESTDIR = $$PWD/debug
+        OBJECTS_DIR = $$PWD/debug
+    }
 
-        CONFIG(release, debug|release) {
-                mkpath($$PWD/release)
+    CONFIG(release, debug|release) {
+        mkpath($$PWD/release)
 
-                DESTDIR = $$PWD/release
-                OBJECTS_DIR = $$PWD/release
-        }
+        DESTDIR = $$PWD/release
+        OBJECTS_DIR = $$PWD/release
+    }
 }
