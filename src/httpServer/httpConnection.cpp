@@ -183,8 +183,7 @@ void HttpConnection::bytesWritten(qint64 bytes)
         auto it = data.find(response);
         if (it != data.end())
         {
-            delete it->second->request;
-            delete it->second;
+            it->second->finished = true;
             data.erase(it);
         }
 
@@ -265,17 +264,11 @@ HttpConnection::~HttpConnection()
 
     // Delete pending responses
     while (!pendingResponses.empty())
-    {
-        delete pendingResponses.front();
         pendingResponses.pop();
-    }
 
-    // Delete pending requests
+    // Clear pending requests, will be automatically cleaned up
     for (auto it : data)
-    {
-        delete it.second->request;
-        delete it.second;
-    }
+        it.second->finished = true;
     data.clear();
 
     if (currentRequest)

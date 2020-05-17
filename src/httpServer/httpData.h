@@ -17,6 +17,7 @@ struct HttpData
     HttpRequest *request;
     HttpResponse *response;
     std::unordered_map<QString, QVariant> state;
+    bool finished;
 
     HttpData(HttpRequest *request, HttpResponse *response);
     ~HttpData();

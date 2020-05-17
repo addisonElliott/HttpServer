@@ -10,6 +10,7 @@
 
 #include <exception>
 #include <list>
+#include <memory>
 #include <QTcpSocket>
 #include <QThread>
 #include <QSslConfiguration>
