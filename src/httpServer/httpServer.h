@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_H
-#define HTTPSERVER_H
+#ifndef HTTP_SERVER_HTTPSERVER_H
+#define HTTP_SERVER_HTTPSERVER_H
 
 #include "httpConnection.h"
 #include "httpServerConfig.h"
@@ -44,4 +44,4 @@ signals:
 
 };
 
-#endif // HTTPSERVER_H
+#endif // HTTP_SERVER_HTTPSERVER_H

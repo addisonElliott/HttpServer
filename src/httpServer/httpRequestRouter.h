@@ -1,5 +1,5 @@
-#ifndef HTTP_REQUEST_ROUTER_H
-#define HTTP_REQUEST_ROUTER_H
+#ifndef HTTP_SERVER_HTTP_REQUEST_ROUTER_H
+#define HTTP_SERVER_HTTP_REQUEST_ROUTER_H
 
 #include <functional>
 #include <list>
@@ -63,4 +63,4 @@ public:
     HttpPromise route(std::shared_ptr<HttpData> data, bool *foundRoute = nullptr);
 };
 
-#endif // HTTP_REQUEST_ROUTER_H
+#endif // HTTP_SERVER_HTTP_REQUEST_ROUTER_H

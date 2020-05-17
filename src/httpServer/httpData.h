@@ -1,5 +1,5 @@
-#ifndef HTTPDATA_H
-#define HTTPDATA_H
+#ifndef HTTP_SERVER_HTTP_DATA_H
+#define HTTP_SERVER_HTTP_DATA_H
 
 #include "util.h"
 
@@ -25,4 +25,4 @@ struct HTTPSERVER_EXPORT HttpData
     void checkFinished();
 };
 
-#endif // HTTPDATA_H
+#endif // HTTP_SERVER_HTTP_DATA_H

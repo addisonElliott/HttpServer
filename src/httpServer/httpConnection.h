@@ -1,5 +1,5 @@
-#ifndef HTTP_CONNECTION_H
-#define HTTP_CONNECTION_H
+#ifndef HTTP_SERVER_HTTP_CONNECTION_H
+#define HTTP_SERVER_HTTP_CONNECTION_H
 
 #include "httpData.h"
 #include "httpServerConfig.h"
@@ -61,4 +61,4 @@ signals:
     void disconnected();
 };
 
-#endif // HTTP_CONNECTION_H
+#endif // HTTP_SERVER_HTTP_CONNECTION_H

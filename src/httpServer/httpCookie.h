@@ -1,5 +1,5 @@
-#ifndef HTTP_COOKIE_H
-#define HTTP_COOKIE_H
+#ifndef HTTP_SERVER_HTTP_COOKIE_H
+#define HTTP_SERVER_HTTP_COOKIE_H
 
 #include <QByteArray>
 #include <QDateTime>
@@ -55,4 +55,4 @@ struct HTTPSERVER_EXPORT HttpCookie
     }
 };
 
-#endif // HTTP_COOKIE_H
+#endif // HTTP_SERVER_HTTP_COOKIE_H

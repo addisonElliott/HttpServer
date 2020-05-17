@@ -1,5 +1,5 @@
-#ifndef CONST_H
-#define CONST_H
+#ifndef HTTP_SERVER_CONST_H
+#define HTTP_SERVER_CONST_H
 
 #include <QMetaType>
 #include <QRegularExpressionMatch>
@@ -14,4 +14,4 @@ using HttpPromise = QPromise<std::shared_ptr<HttpData>>;
 
 Q_DECLARE_METATYPE(QRegularExpressionMatch);
 
-#endif // CONST_H
+#endif // HTTP_SERVER_CONST_H

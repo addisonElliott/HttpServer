@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef HTTP_SERVER_UTIL_H
+#define HTTP_SERVER_UTIL_H
 
 #include <algorithm>
 #include <functional>
@@ -236,4 +236,4 @@ HTTPSERVER_EXPORT QString getHttpStatusStr(HttpStatus status);
 QByteArray gzipCompress(QByteArray &data, int compressionLevel = Z_DEFAULT_COMPRESSION);
 QByteArray gzipUncompress(QByteArray &data);
 
-#endif // UTIL_H
+#endif // HTTP_SERVER_UTIL_H

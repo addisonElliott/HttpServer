@@ -1,5 +1,5 @@
-#ifndef HTTP_REQUEST_HANDLER_H
-#define HTTP_REQUEST_HANDLER_H
+#ifndef HTTP_SERVER_HTTP_REQUEST_HANDLER_H
+#define HTTP_SERVER_HTTP_REQUEST_HANDLER_H
 
 #include <QtPromise>
 
@@ -16,7 +16,16 @@ class HTTPSERVER_EXPORT HttpRequestHandler : public QObject
 public:
     HttpRequestHandler(QObject *parent = nullptr) : QObject(parent) {}
 
+    // Synchronous vs Asynchronous Middleware
+
+    // Synchronous Middleware
+    HttpPromise handleCORS(std::shared_ptr<HttpData> data);
+    HttpPromise handleVerifyJson(std::shared_ptr<HttpData> data);
+    HttpPromise handleGetArray(std::shared_ptr<HttpData> data);
+    HttpPromise handleGetObject(std::shared_ptr<HttpData> data);
+    HttpPromise handleBasicAuth(QString validUsername, QString validPassword);
+
     virtual HttpPromise handle(std::shared_ptr<HttpData> data) = 0;
 };
 
-#endif // HTTP_REQUEST_HANDLER_H
+#endif // HTTP_SERVER_HTTP_REQUEST_HANDLER_H

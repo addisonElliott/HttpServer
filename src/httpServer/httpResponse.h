@@ -1,5 +1,5 @@
-#ifndef HTTP_RESPONSE_H
-#define HTTP_RESPONSE_H
+#ifndef HTTP_SERVER_HTTP_RESPONSE_H
+#define HTTP_SERVER_HTTP_RESPONSE_H
 
 #include "httpCookie.h"
 #include "httpServerConfig.h"
@@ -82,4 +82,4 @@ public:
     bool writeChunk(QTcpSocket *socket);
 };
 
-#endif // HTTP_RESPONSE_H
+#endif // HTTP_SERVER_HTTP_RESPONSE_H
