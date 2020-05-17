@@ -170,6 +170,6 @@ HttpPromise RequestHandler::handleAsyncTest(HttpData *data)
     return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpData *data) {
         qInfo() << "Timeout reached";
         data->response->setStatus(HttpStatus::Ok);
-        return HttpPromise::resolve(data);
+        return data;
     });
 }

@@ -107,14 +107,13 @@ void HttpConnection::read()
         auto promise = HttpPromise::resolve(httpData).then([=](HttpData *data) {
             return requestHandler->handle(data);
         });
-        if (config->responseTimeout > 0)
-            promise = promise.timeout(config->responseTimeout);
+//        if (config->responseTimeout > 0)
+//            promise = promise.timeout(config->responseTimeout * 1000);
 
-        promise
+        promise.timeout(5000)
             .fail([=](const QPromiseTimeoutException &error) {
                 // Request timed out
                 response->setError(HttpStatus::RequestTimeout, "", false);
-                //
                 return nullptr;
             })
             .fail([=](const HttpException &error) {

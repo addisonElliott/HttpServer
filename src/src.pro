@@ -27,6 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
         httpServer/httpConnection.cpp \
+        httpServer/httpData.cpp \
         httpServer/httpRequest.cpp \
         httpServer/httpRequestRouter.cpp \
         httpServer/httpResponse.cpp \
