@@ -1,13 +1,13 @@
 #include "httpRequestRouter.h"
 
-void HttpRequestRouter::addRoute(QString method, QString regex, HttpRequestMapFunction handler)
+void HttpRequestRouter::addRoute(QString method, QString regex, HttpFunc handler)
 {
     HttpRequestRoute route = {{method}, QRegularExpression(regex), handler};
     route.pathRegex.optimize();
     routes.push_back(route);
 }
 
-void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, HttpRequestMapFunction handler)
+void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, HttpFunc handler)
 {
     HttpRequestRoute route = {methods, QRegularExpression(regex), handler};
     route.pathRegex.optimize();

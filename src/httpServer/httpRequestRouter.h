@@ -12,14 +12,12 @@
 #include "util.h"
 
 
-typedef std::function<HttpPromise(std::shared_ptr<HttpData> data)> HttpRequestMapFunction;
-
 struct HttpRequestRoute
 {
     std::vector<QString> methods;
     QRegularExpression pathRegex;
 
-    HttpRequestMapFunction handler;
+    HttpFunc handler;
 };
 
 class HTTPSERVER_EXPORT HttpRequestRouter
@@ -28,8 +26,8 @@ private:
     std::list<HttpRequestRoute> routes;
 
 public:
-    void addRoute(QString method, QString regex, HttpRequestMapFunction handler);
-    void addRoute(std::vector<QString> methods, QString regex, HttpRequestMapFunction handler);
+    void addRoute(QString method, QString regex, HttpFunc handler);
+    void addRoute(std::vector<QString> methods, QString regex, HttpFunc handler);
 
     // Allows registering member functions using addRoute(..., <CLASS>, &Class:memberFunction)
     template <typename T>

@@ -11,6 +11,7 @@
 using QtPromise::QPromiseTimeoutException;
 using QtPromise::QPromise;
 using HttpPromise = QPromise<std::shared_ptr<HttpData>>;
+using HttpFunc = std::function<HttpPromise(std::shared_ptr<HttpData> data)>;
 
 Q_DECLARE_METATYPE(QRegularExpressionMatch);
 
