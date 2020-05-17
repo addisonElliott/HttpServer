@@ -64,7 +64,7 @@ void HttpConnection::read()
         if (!currentRequest)
         {
             currentRequest = new HttpRequest(config);
-            currentResponse = new HttpResponse(config, this);
+            currentResponse = new HttpResponse(config);
         }
 
         // If this returns false, that indicates there is no more data left to read
@@ -189,7 +189,6 @@ void HttpConnection::bytesWritten(qint64 bytes)
         }
 
         // Delete response and pop from queue
-        delete response;
         pendingResponses.pop();
     }
 
@@ -220,7 +219,7 @@ void HttpConnection::timeout()
 
     // Otherwise we send a request timeout response
     if (!currentResponse)
-        currentResponse = new HttpResponse(config, this);
+        currentResponse = new HttpResponse(config);
 
     currentResponse->setError(HttpStatus::RequestTimeout, "", true);
     currentResponse->prepareToSend();
