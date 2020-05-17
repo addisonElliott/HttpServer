@@ -18,9 +18,7 @@ HttpPromise RequestHandler::handle(std::shared_ptr<HttpData> data)
         return promise;
 
     if (data->request->mimeType().compare("application/json", Qt::CaseInsensitive) != 0)
-    {
         throw HttpException(HttpStatus::BadRequest, "Request body content type must be application/json");
-    }
 
     QJsonDocument jsonDocument = data->request->parseJsonBody();
     if (jsonDocument.isNull())

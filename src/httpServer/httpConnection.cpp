@@ -107,8 +107,8 @@ void HttpConnection::read()
         auto promise = HttpPromise::resolve(httpData).then([=](std::shared_ptr<HttpData> data) {
             return requestHandler->handle(data);
         });
-//        if (config->responseTimeout > 0)
-//            promise = promise.timeout(config->responseTimeout * 1000);
+        if (config->responseTimeout > 0)
+            promise = promise.timeout(config->responseTimeout * 1000);
 
         promise.timeout(5000)
             .fail([=](const QPromiseTimeoutException &error) {
