@@ -12,6 +12,11 @@ void HttpData::checkFinished()
         throw HttpException(HttpStatus::None);
 }
 
+bool HttpData::test2()
+{
+    return true;
+}
+
 HttpData::~HttpData()
 {
     delete request;

@@ -19,10 +19,16 @@ struct HttpData
     std::unordered_map<QString, QVariant> state;
     bool finished;
 
-    void checkFinished();
-
     HttpData(HttpRequest *request, HttpResponse *response);
     ~HttpData();
+
+    void checkFinished();
+    bool test()
+    {
+        return false;
+    }
+
+    bool test2();
 };
 
 #endif // HTTPDATA_H
