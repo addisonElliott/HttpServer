@@ -10,7 +10,7 @@ RequestHandler::RequestHandler()
     router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
 }
 
-HttpPromise RequestHandler::handle(HttpData *data)
+HttpPromise RequestHandler::handle(std::shared_ptr<HttpData> data)
 {
     bool foundRoute;
     HttpPromise promise = router.route(data, &foundRoute);
@@ -34,7 +34,7 @@ HttpPromise RequestHandler::handle(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleGetUsername(HttpData *data)
+HttpPromise RequestHandler::handleGetUsername(std::shared_ptr<HttpData> data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     QString username = match.captured(1);
@@ -46,7 +46,7 @@ HttpPromise RequestHandler::handleGetUsername(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleGzipTest(HttpData *data)
+HttpPromise RequestHandler::handleGzipTest(std::shared_ptr<HttpData> data)
 {
     QString output = "read 24 bytes \
             read 24 bytes = 48 \
@@ -73,7 +73,7 @@ HttpPromise RequestHandler::handleGzipTest(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleFormTest(HttpData *data)
+HttpPromise RequestHandler::handleFormTest(std::shared_ptr<HttpData> data)
 {
     auto formFields = data->request->formFields();
     auto formFiles = data->request->formFiles();
@@ -91,7 +91,7 @@ HttpPromise RequestHandler::handleFormTest(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleFileTest(HttpData *data)
+HttpPromise RequestHandler::handleFileTest(std::shared_ptr<HttpData> data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int id = match.captured(1).toInt();
@@ -154,7 +154,7 @@ HttpPromise RequestHandler::handleFileTest(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleErrorTest(HttpData *data)
+HttpPromise RequestHandler::handleErrorTest(std::shared_ptr<HttpData> data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int statusCode = match.captured(1).toInt();
@@ -163,11 +163,11 @@ HttpPromise RequestHandler::handleErrorTest(HttpData *data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleAsyncTest(HttpData *data)
+HttpPromise RequestHandler::handleAsyncTest(std::shared_ptr<HttpData> data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int delay = match.captured(1).toInt();
-    return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpData *data) {
+    return HttpPromise::resolve(data).delay(delay * 1000).then([](std::shared_ptr<HttpData> data) {
         qInfo() << "Timeout reached";
         data->response->setStatus(HttpStatus::Ok);
         return data;

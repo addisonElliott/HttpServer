@@ -82,7 +82,7 @@ void HttpConnection::read()
         timeoutTimer->stop();
 
         // Store request & response in map while it is processed asynchronously
-        auto httpData = new HttpData(currentRequest, currentResponse);
+        auto httpData = std::make_shared<HttpData>(currentRequest, currentResponse);
         data.emplace(currentResponse, httpData);
         pendingResponses.push(currentResponse);
 
@@ -104,7 +104,7 @@ void HttpConnection::read()
         // Note: Create local copies of current request and response so they are captured by value in the lambda
         auto request = currentRequest;
         auto response = currentResponse;
-        auto promise = HttpPromise::resolve(httpData).then([=](HttpData *data) {
+        auto promise = HttpPromise::resolve(httpData).then([=](std::shared_ptr<HttpData> data) {
             return requestHandler->handle(data);
         });
 //        if (config->responseTimeout > 0)

@@ -10,7 +10,7 @@
 
 using QtPromise::QPromiseTimeoutException;
 using QtPromise::QPromise;
-using HttpPromise = QPromise<HttpData *>;
+using HttpPromise = QPromise<std::shared_ptr<HttpData>>;
 
 Q_DECLARE_METATYPE(QRegularExpressionMatch);
 
