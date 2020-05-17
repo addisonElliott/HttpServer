@@ -6,6 +6,12 @@ HttpData::HttpData(HttpRequest *request, HttpResponse *response) : request(reque
 {
 }
 
+void HttpData::checkFinished()
+{
+    if (finished)
+        throw HttpException(HttpStatus::None);
+}
+
 HttpData::~HttpData()
 {
     delete request;

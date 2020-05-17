@@ -138,6 +138,7 @@ void HttpConnection::read()
                 }
 
                 // Send response
+                httpData->finished = true;
                 response->prepareToSend();
 
                 // If we were waiting on this response to be sent, then call bytesWritten to get things rolling

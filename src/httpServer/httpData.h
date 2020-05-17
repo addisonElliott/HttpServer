@@ -19,6 +19,8 @@ struct HttpData
     std::unordered_map<QString, QVariant> state;
     bool finished;
 
+    void checkFinished();
+
     HttpData(HttpRequest *request, HttpResponse *response);
     ~HttpData();
 };

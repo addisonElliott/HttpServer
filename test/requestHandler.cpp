@@ -169,6 +169,8 @@ HttpPromise RequestHandler::handleAsyncTest(std::shared_ptr<HttpData> data)
     int delay = match.captured(1).toInt();
     return HttpPromise::resolve(data).delay(delay * 1000).then([](std::shared_ptr<HttpData> data) {
         qInfo() << "Timeout reached";
+        data->checkFinished();
+
         data->response->setStatus(HttpStatus::Ok);
         return data;
     });
