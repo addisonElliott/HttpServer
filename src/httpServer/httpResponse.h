@@ -80,11 +80,6 @@ public:
     void setupFromRequest(HttpRequest *request);
     void prepareToSend();
     bool writeChunk(QTcpSocket *socket);
-
-signals:
-    // When this signal is called, if asynchronous work is being done, the user MUST not use the response pointer
-    // again because it will be deleted
-    void cancelled();
 };
 
 #endif // HTTP_RESPONSE_H

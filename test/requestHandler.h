@@ -4,6 +4,7 @@
 #include <QtPromise>
 #include <QTimer>
 
+#include "httpServer/httpData.h"
 #include "httpServer/httpRequestHandler.h"
 #include "httpServer/httpRequestRouter.h"
 

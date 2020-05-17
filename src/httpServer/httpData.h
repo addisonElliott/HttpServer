@@ -12,7 +12,7 @@
 class HttpRequest;
 class HttpResponse;
 
-struct HttpData
+struct HTTPSERVER_EXPORT HttpData
 {
     HttpRequest *request;
     HttpResponse *response;
@@ -23,12 +23,6 @@ struct HttpData
     ~HttpData();
 
     void checkFinished();
-    bool test()
-    {
-        return false;
-    }
-
-    bool test2();
 };
 
 #endif // HTTPDATA_H
