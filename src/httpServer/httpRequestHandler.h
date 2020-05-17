@@ -16,14 +16,16 @@ class HTTPSERVER_EXPORT HttpRequestHandler : public QObject
 public:
     HttpRequestHandler(QObject *parent = nullptr) : QObject(parent) {}
 
-    // Synchronous vs Asynchronous Middleware
+
 
     // Synchronous Middleware
     HttpPromise handleCORS(std::shared_ptr<HttpData> data);
     HttpPromise handleVerifyJson(std::shared_ptr<HttpData> data);
     HttpPromise handleGetArray(std::shared_ptr<HttpData> data);
     HttpPromise handleGetObject(std::shared_ptr<HttpData> data);
-    HttpPromise handleBasicAuth(QString validUsername, QString validPassword);
+    HttpFunc handleBasicAuth(QString validUsername, QString validPassword);
+
+    // Asynchronous Middleware
 
     virtual HttpPromise handle(std::shared_ptr<HttpData> data) = 0;
 };

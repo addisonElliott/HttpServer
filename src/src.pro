@@ -32,6 +32,11 @@ SOURCES += \
         httpServer/httpRequestRouter.cpp \
         httpServer/httpResponse.cpp \
         httpServer/httpServer.cpp \
+        httpServer/middleware/CORS.cpp \
+        httpServer/middleware/auth.cpp \
+        httpServer/middleware/getArray.cpp \
+        httpServer/middleware/getObject.cpp \
+        httpServer/middleware/verifyJson.cpp \
         httpServer/util.cpp
 
 HEADERS += \
@@ -45,6 +50,7 @@ HEADERS += \
         httpServer/httpResponse.h \
         httpServer/httpServer.h \
         httpServer/httpServerConfig.h \
+        httpServer/middleware.h \
         httpServer/util.h
 
 include(../common.pri)
