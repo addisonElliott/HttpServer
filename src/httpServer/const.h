@@ -13,8 +13,8 @@ using QtPromise::QPromise;
 using HttpDataPtr = std::shared_ptr<HttpData>;
 using HttpPromise = QPromise<std::shared_ptr<HttpData>>;
 using HttpFunc = std::function<HttpPromise(std::shared_ptr<HttpData> data)>;
-using HttpResolveFunc = QtPromise::QPromiseResolve<std::shared_ptr<HttpData>>;
-using HttpRejectFunc = QtPromise::QPromiseReject<std::shared_ptr<HttpData>>;
+using HttpResolveFunc = const QtPromise::QPromiseResolve<std::shared_ptr<HttpData>> &;
+using HttpRejectFunc = const QtPromise::QPromiseReject<std::shared_ptr<HttpData>> &;
 
 Q_DECLARE_METATYPE(QRegularExpressionMatch);
 
