@@ -45,7 +45,7 @@ namespace middleware
     HttpPromise verifyJson(HttpDataPtr data);
     HttpPromise getArray(HttpDataPtr data);
     HttpPromise getObject(HttpDataPtr data);
-    HttpFunc checkAuthBasic(QString validUsername, QString validPassword);
+    HttpPromise checkAuthBasic(HttpDataPtr data, QString validUsername, QString validPassword);
 
     // Asynchronous Middleware
 }
