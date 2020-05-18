@@ -104,7 +104,7 @@ void HttpConnection::read()
         // Note: Create local copies of current request and response so they are captured by value in the lambda
         auto request = currentRequest;
         auto response = currentResponse;
-        auto promise = HttpPromise::resolve(httpData).then([=](std::shared_ptr<HttpData> data) {
+        auto promise = HttpPromise::resolve(httpData).then([=](HttpDataPtr data) {
             return requestHandler->handle(data);
         });
         if (config->responseTimeout > 0)

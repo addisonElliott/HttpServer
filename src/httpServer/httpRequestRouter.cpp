@@ -14,7 +14,7 @@ void HttpRequestRouter::addRoute(std::vector<QString> methods, QString regex, Ht
     routes.push_back(route);
 }
 
-HttpPromise HttpRequestRouter::route(std::shared_ptr<HttpData> data, bool *foundRoute)
+HttpPromise HttpRequestRouter::route(HttpDataPtr data, bool *foundRoute)
 {
     // Iterate through each route
     for (const HttpRequestRoute &route : routes)

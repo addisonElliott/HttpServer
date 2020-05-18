@@ -19,14 +19,14 @@ private:
 public:
     RequestHandler();
 
-    HttpPromise handle(std::shared_ptr<HttpData> data);
+    HttpPromise handle(HttpDataPtr data);
 
-    HttpPromise handleGetUsername(std::shared_ptr<HttpData> data);
-    HttpPromise handleGzipTest(std::shared_ptr<HttpData> data);
-    HttpPromise handleFormTest(std::shared_ptr<HttpData> data);
-    HttpPromise handleFileTest(std::shared_ptr<HttpData> data);
-    HttpPromise handleErrorTest(std::shared_ptr<HttpData> data);
-    HttpPromise handleAsyncTest(std::shared_ptr<HttpData> data);
+    HttpPromise handleGetUsername(HttpDataPtr data);
+    HttpPromise handleGzipTest(HttpDataPtr data);
+    HttpPromise handleFormTest(HttpDataPtr data);
+    HttpPromise handleFileTest(HttpDataPtr data);
+    HttpPromise handleErrorTest(HttpDataPtr data);
+    HttpPromise handleAsyncTest(HttpDataPtr data);
 };
 
 #endif // REQUESTHANDLER_H

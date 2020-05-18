@@ -5,7 +5,7 @@ namespace middleware
 
 HttpFunc checkAuthBasic(QString validUsername, QString validPassword)
 {
-    return [=](std::shared_ptr<HttpData> data) -> HttpPromise {
+    return [=](HttpDataPtr data) -> HttpPromise {
         QString auth;
         if (data->request->header("Authorization", &auth))
         {

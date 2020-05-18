@@ -3,7 +3,7 @@
 namespace middleware
 {
 
-HttpPromise getObject(std::shared_ptr<HttpData> data)
+HttpPromise getObject(HttpDataPtr data)
 {
     QJsonDocument jsonDocument = data->request->parseJsonBody();
     if (jsonDocument.isNull())

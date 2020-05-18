@@ -3,7 +3,7 @@
 namespace middleware
 {
 
-HttpPromise CORS(std::shared_ptr<HttpData> data)
+HttpPromise CORS(HttpDataPtr data)
 {
     data->response->setHeader("Access-Control-Allow-Origin", data->request->headerDefault("Origin", "*"));
     data->response->setHeader("Access-Control-Allow-Credentials", "true");

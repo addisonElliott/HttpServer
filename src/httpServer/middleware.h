@@ -21,7 +21,7 @@
 //          promise.then(middleware1).then(middleware2).then(middleware3)
 // and turn it into:
 //          promise.then(middleware1).then(middleware2).then(middleware3)
-//          promise.then([](std::shared_ptr<HttpData> data) {
+//          promise.then([](HttpDataPtr data) {
 //              middleware1(data);
 //              middleware2(data);
 //              middleware3(data);
@@ -30,7 +30,7 @@
 // Middleware returning HttpPromise vs HttpFunc
 // ----------------------------------------------------------------------------------------------------
 // Option 1:
-//      HttpPromise middleware(std::shared_ptr<HttpData> data);
+//      HttpPromise middleware(HttpDataPtr data);
 //
 //      Used whenever all state information is stored in data->state
 //
@@ -41,10 +41,10 @@
 namespace middleware
 {
     // Synchronous Middleware
-    HttpPromise CORS(std::shared_ptr<HttpData> data);
-    HttpPromise verifyJson(std::shared_ptr<HttpData> data);
-    HttpPromise getArray(std::shared_ptr<HttpData> data);
-    HttpPromise getObject(std::shared_ptr<HttpData> data);
+    HttpPromise CORS(HttpDataPtr data);
+    HttpPromise verifyJson(HttpDataPtr data);
+    HttpPromise getArray(HttpDataPtr data);
+    HttpPromise getObject(HttpDataPtr data);
     HttpFunc checkAuthBasic(QString validUsername, QString validPassword);
 
     // Asynchronous Middleware

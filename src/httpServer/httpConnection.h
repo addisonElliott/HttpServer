@@ -39,7 +39,7 @@ private:
     // Responses are stored in a queue to support HTTP pipelining and sending multiple responses
     std::queue<HttpResponse *> pendingResponses;
     // Store data for each request to enable asynchronous logic
-    std::unordered_map<HttpResponse *, std::shared_ptr<HttpData>> data;
+    std::unordered_map<HttpResponse *, HttpDataPtr> data;
 
     const QSslConfiguration *sslConfig;
 

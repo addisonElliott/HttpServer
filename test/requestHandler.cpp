@@ -10,7 +10,7 @@ RequestHandler::RequestHandler()
     router.addRoute("GET", "^/asyncTest/(\\d*)/?$", this, &RequestHandler::handleAsyncTest);
 }
 
-HttpPromise RequestHandler::handle(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handle(HttpDataPtr data)
 {
     bool foundRoute;
     HttpPromise promise = router.route(data, &foundRoute);
@@ -32,7 +32,7 @@ HttpPromise RequestHandler::handle(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleGetUsername(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleGetUsername(HttpDataPtr data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     QString username = match.captured(1);
@@ -44,7 +44,7 @@ HttpPromise RequestHandler::handleGetUsername(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleGzipTest(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleGzipTest(HttpDataPtr data)
 {
     QString output = "read 24 bytes \
             read 24 bytes = 48 \
@@ -71,7 +71,7 @@ HttpPromise RequestHandler::handleGzipTest(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleFormTest(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleFormTest(HttpDataPtr data)
 {
     auto formFields = data->request->formFields();
     auto formFiles = data->request->formFiles();
@@ -89,7 +89,7 @@ HttpPromise RequestHandler::handleFormTest(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleFileTest(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleFileTest(HttpDataPtr data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int id = match.captured(1).toInt();
@@ -152,7 +152,7 @@ HttpPromise RequestHandler::handleFileTest(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleErrorTest(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleErrorTest(HttpDataPtr data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int statusCode = match.captured(1).toInt();
@@ -161,11 +161,11 @@ HttpPromise RequestHandler::handleErrorTest(std::shared_ptr<HttpData> data)
     return HttpPromise::resolve(data);
 }
 
-HttpPromise RequestHandler::handleAsyncTest(std::shared_ptr<HttpData> data)
+HttpPromise RequestHandler::handleAsyncTest(HttpDataPtr data)
 {
     auto match = data->state["match"].value<QRegularExpressionMatch>();
     int delay = match.captured(1).toInt();
-    return HttpPromise::resolve(data).delay(delay * 1000).then([](std::shared_ptr<HttpData> data) {
+    return HttpPromise::resolve(data).delay(delay * 1000).then([](HttpDataPtr data) {
         qInfo() << "Timeout reached";
         data->checkFinished();
 
