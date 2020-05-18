@@ -27,17 +27,6 @@
 //              middleware3(data);
 //          });
 //
-// Middleware returning HttpPromise vs HttpFunc
-// ----------------------------------------------------------------------------------------------------
-// Option 1:
-//      HttpPromise middleware(HttpDataPtr data);
-//
-//      Used whenever all state information is stored in data->state
-//
-// Option 2:
-//      HttpFunc middleware(...args);
-//
-//      Used whenever arguments besides ones saved in data->state are necessary for the middleware
 namespace middleware
 {
     // Synchronous Middleware
