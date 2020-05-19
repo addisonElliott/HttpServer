@@ -19,6 +19,15 @@ Features
 * JSON sending or receiving support
 * Custom error responses (e.g. HTML page or JSON response)
 
+Promises Support
+=================
+There are two variants of this library, one with and without promise support. Promises allow for easier & cleaner development with asynchronous logic. The two variants are supported via separate branches:
+
+1. **master** - No promise support
+2. **promises** - Promise support
+
+**Note:** The variant without promise support is considered deprecated and will only be supported via bug fixes in the future. For new development, promises are encouraged. The code will remain in two separate branches until sufficient unit testing & documentation is provided for promises support. If you would like to help, please contribute!
+
 Installing
 =================
 Prerequisites
