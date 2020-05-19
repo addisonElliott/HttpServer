@@ -1,6 +1,7 @@
-#ifndef HTTP_CONNECTION_H
-#define HTTP_CONNECTION_H
+#ifndef HTTP_SERVER_HTTP_CONNECTION_H
+#define HTTP_SERVER_HTTP_CONNECTION_H
 
+#include "httpData.h"
 #include "httpServerConfig.h"
 #include "httpRequest.h"
 #include "httpRequestHandler.h"
@@ -9,11 +10,15 @@
 
 #include <exception>
 #include <list>
+#include <memory>
 #include <QTcpSocket>
 #include <QThread>
 #include <QSslConfiguration>
 #include <QTimer>
+#include <QtPromise>
 #include <queue>
+#include <unordered_map>
+
 
 
 class HTTPSERVER_EXPORT HttpConnection : public QObject
@@ -25,7 +30,6 @@ private:
     QTcpSocket *socket;
     QHostAddress address;
     QTimer *timeoutTimer;
-    std::unordered_map<HttpResponse *, QTimer *> responseTimers;
     bool keepAliveMode;
 
     HttpRequest *currentRequest;
@@ -34,23 +38,22 @@ private:
     HttpRequestHandler *requestHandler;
     // Responses are stored in a queue to support HTTP pipelining and sending multiple responses
     std::queue<HttpResponse *> pendingResponses;
-    // Requests are stored and are deleted once the response is sent, this enables asynchronous logic
-    std::unordered_map<HttpResponse *, HttpRequest *> requests;
+    // Store data for each request to enable asynchronous logic
+    std::unordered_map<HttpResponse *, HttpDataPtr> data;
 
     const QSslConfiguration *sslConfig;
 
     void createSocket(qintptr socketDescriptor);
 
 public:
-    HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor, QSslConfiguration *sslConfig = nullptr, QObject *parent = nullptr);
+    HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor,
+        QSslConfiguration *sslConfig = nullptr, QObject *parent = nullptr);
     ~HttpConnection();
-	
+
 private slots:
     void read();
     void bytesWritten(qint64 bytes);
     void timeout();
-    void responseTimeout();
-    void responseFinished();
     void socketDisconnected();
     void sslErrors(const QList<QSslError> &errors);
 
@@ -58,4 +61,4 @@ signals:
     void disconnected();
 };
 
-#endif // HTTP_CONNECTION_H
+#endif // HTTP_SERVER_HTTP_CONNECTION_H

@@ -1,5 +1,5 @@
-#ifndef HTTP_REQUEST_H
-#define HTTP_REQUEST_H
+#ifndef HTTP_SERVER_HTTP_REQUEST_H
+#define HTTP_SERVER_HTTP_REQUEST_H
 
 #include "httpCookie.h"
 #include "httpResponse.h"
@@ -162,4 +162,4 @@ template<> HTTPSERVER_EXPORT bool HttpRequest::header(QString key, float *value)
 template<> HTTPSERVER_EXPORT bool HttpRequest::header(QString key, double *value) const;
 template<> HTTPSERVER_EXPORT bool HttpRequest::header(QString key, QUrl *value) const;
 
-#endif // HTTP_REQUEST_H
+#endif // HTTP_SERVER_HTTP_REQUEST_H

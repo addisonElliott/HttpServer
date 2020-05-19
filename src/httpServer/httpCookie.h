@@ -1,5 +1,5 @@
-#ifndef HTTP_COOKIE_H
-#define HTTP_COOKIE_H
+#ifndef HTTP_SERVER_HTTP_COOKIE_H
+#define HTTP_SERVER_HTTP_COOKIE_H
 
 #include <QByteArray>
 #include <QDateTime>
@@ -21,8 +21,9 @@ struct HTTPSERVER_EXPORT HttpCookie
     bool httpOnly;
 
     HttpCookie() {}
-    HttpCookie(QString name, QString value, int ageSeconds = -1, QDateTime expiration = QDateTime(), QString domain = "", QString path = "/", bool secure = false, bool httpOnly = false) :
-        name(name), value(value), ageSeconds(ageSeconds), expiration(expiration), domain(domain), path(path), secure(secure), httpOnly(httpOnly) {}
+    HttpCookie(QString name, QString value, int ageSeconds = -1, QDateTime expiration = QDateTime(), QString domain = "",
+        QString path = "/", bool secure = false, bool httpOnly = false) : name(name), value(value), ageSeconds(ageSeconds),
+        expiration(expiration), domain(domain), path(path), secure(secure), httpOnly(httpOnly) {}
 
     QByteArray toByteArray() const
     {
@@ -54,4 +55,4 @@ struct HTTPSERVER_EXPORT HttpCookie
     }
 };
 
-#endif // HTTP_COOKIE_H
+#endif // HTTP_SERVER_HTTP_COOKIE_H

@@ -1,7 +1,8 @@
 #include "httpConnection.h"
 
-HttpConnection::HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor, QSslConfiguration *sslConfig, QObject *parent) :
-    QObject(parent), config(config), currentRequest(nullptr), currentResponse(nullptr), requestHandler(requestHandler), sslConfig(sslConfig)
+HttpConnection::HttpConnection(HttpServerConfig *config, HttpRequestHandler *requestHandler, qintptr socketDescriptor,
+    QSslConfiguration *sslConfig, QObject *parent) : QObject(parent), config(config), currentRequest(nullptr),
+    currentResponse(nullptr), requestHandler(requestHandler), sslConfig(sslConfig)
 {
     timeoutTimer = new QTimer(this);
     keepAliveMode = false;
@@ -27,7 +28,8 @@ void HttpConnection::createSocket(qintptr socketDescriptor)
 
         // Use QOverload because there is another function sslErrors that causes issues
         // Any errors in TLS handshake will be notified via this signal
-        connect(sslSocket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this, &HttpConnection::sslErrors);
+        connect(sslSocket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), this,
+            &HttpConnection::sslErrors);
 	}
     else
         socket = new QTcpSocket();
@@ -62,7 +64,7 @@ void HttpConnection::read()
         if (!currentRequest)
         {
             currentRequest = new HttpRequest(config);
-            currentResponse = new HttpResponse(config, this);
+            currentResponse = new HttpResponse(config);
         }
 
         // If this returns false, that indicates there is no more data left to read
@@ -79,66 +81,76 @@ void HttpConnection::read()
         // We are done parsing data, whether it be an error or not
         timeoutTimer->stop();
 
+        // Store request & response in map while it is processed asynchronously
+        auto httpData = std::make_shared<HttpData>(currentRequest, currentResponse);
+        data.emplace(currentResponse, httpData);
+        pendingResponses.push(currentResponse);
+
         // If a response exists, then just send that, doesn't matter if its an error or not
-        if (!currentResponse->isValid())
+        if (currentResponse->isValid())
         {
-            if (config->verbosity >= HttpServerConfig::Verbose::Info)
-                qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method()).arg(currentRequest->uriStr()).arg(address.toString());
-
-            try
-            {
-                // Block signals so that the finished signal is not called
-                currentResponse->blockSignals(true);
-                requestHandler->handle(currentRequest, currentResponse);
-                currentResponse->blockSignals(false);
-            }
-            catch (const std::exception &e)
-            {
-                currentResponse->setError(HttpStatus::InternalServerError, "An error occurred while processing request");
-
-                if (config->verbosity >= HttpServerConfig::Verbose::Warning)
-                    qWarning().noquote() << QString("Encountered an exception while attempting to parse request from %1: %2").arg(address.toString()).arg(e.what());
-            }
+            currentResponse->setupFromRequest(currentRequest);
+            currentRequest = nullptr;
+            currentResponse = nullptr;
+            return;
         }
+
+        if (config->verbosity >= HttpServerConfig::Verbose::Info)
+            qInfo().noquote() << QString("Received %1 request to %2 from %3").arg(currentRequest->method())
+                .arg(currentRequest->uriStr()).arg(address.toString());
+
+        // Handle request and setup timeout timer if necessary
+        // Note: Wrap the handler in a promise so exceptions are handled correctly
+        // Note: Create local copies of current request and response so they are captured by value in the lambda
+        auto request = currentRequest;
+        auto response = currentResponse;
+        auto promise = HttpPromise::resolve(httpData).then([=](HttpDataPtr data) {
+            return requestHandler->handle(data);
+        });
+        if (config->responseTimeout > 0)
+            promise = promise.timeout(config->responseTimeout * 1000);
+
+        promise.timeout(5000)
+            .fail([=](const QPromiseTimeoutException &error) {
+                // Request timed out
+                response->setError(HttpStatus::RequestTimeout, "", false);
+                return nullptr;
+            })
+            .fail([=](const HttpException &error) {
+                response->setError(error.status, error.message, false);
+                return nullptr;
+            })
+            .fail([=](const std::exception &error) {
+                response->setError(HttpStatus::InternalServerError, error.what(), false);
+                return nullptr;
+            })
+            .finally([=]() {
+                // Handle if no response is set
+                // This should not happen, but handle it and warn the user
+                if (!response->isValid())
+                {
+                    if (config->verbosity >= HttpServerConfig::Verbose::Warning)
+                    {
+                        qWarning().noquote() << QString("No valid response set, defaulting to 500: %1 %2 %3")
+                            .arg(request->method()).arg(request->uriStr()).arg(address.toString());
+                    }
+                    response->setError(HttpStatus::InternalServerError, "An unknown error occurred", false);
+                }
+
+                // Send response
+                httpData->finished = true;
+                response->prepareToSend();
+
+                // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
+                if (response == pendingResponses.front())
+                    bytesWritten(0);
+            });
 
         currentResponse->setupFromRequest(currentRequest);
 
-        if (currentResponse->isValid())
-        {
-            // Save the request (delete after done sending response)
-            requests.emplace(currentResponse, currentRequest);
-            currentRequest = nullptr;
-
-            currentResponse->prepareToSend();
-            pendingResponses.push(currentResponse);
-            currentResponse = nullptr;
-
-            // If this is the only pending response, call bytesWritten to get things rolling
-            if (pendingResponses.size() == 1)
-                bytesWritten(0);
-        }
-        else
-        {
-            // Start response timer
-            if (config->responseTimeout > 0)
-            {
-                QTimer *responseTimer = new QTimer(this);
-                connect(responseTimer, &QTimer::timeout, this, &HttpConnection::responseTimeout);
-                responseTimers.emplace(currentResponse, responseTimer);
-                responseTimer->start(config->responseTimeout * 1000);
-            }
-
-            // We connect as a queued connection so that the function will be called on the next event loop. This allows additional instructions to be called
-            // to the response before actually sending the data
-            connect(currentResponse, &HttpResponse::finished, this, &HttpConnection::responseFinished, Qt::QueuedConnection);
-
-            // Save the request (delete after done sending response)
-            requests.emplace(currentResponse, currentRequest);
-            currentRequest = nullptr;
-
-            pendingResponses.push(currentResponse);
-            currentResponse = nullptr;
-        }
+        // Clear pointers for next request
+        currentRequest = nullptr;
+        currentResponse = nullptr;
     }
 }
 
@@ -149,8 +161,9 @@ void HttpConnection::bytesWritten(qint64 bytes)
     // Keep sending the responses until the buffer fills up
     while (!pendingResponses.empty())
     {
-        // If the response has not been prepared for sending, it means we're still waiting for a response from this
-        // Due to the setup of HTTP pipelining, we must send responses in the same order we received them, so we can't send anything else)
+        // If the response has not been prepared for sending, it means we're still waiting for a response
+        // from this. Due to the setup of HTTP pipelining, we must send responses in the same order we received them,
+        // so we can't send anything else)
         HttpResponse *response = pendingResponses.front();
         if (!response->isSending())
             break;
@@ -168,15 +181,14 @@ void HttpConnection::bytesWritten(qint64 bytes)
         closeConnection |= connection.contains("close", Qt::CaseInsensitive);
 
         // Delete the corresponding request for the response
-        auto it = requests.find(response);
-        if (it != requests.end())
+        auto it = data.find(response);
+        if (it != data.end())
         {
-            delete it->second;
-            requests.erase(it);
+            it->second->finished = true;
+            data.erase(it);
         }
 
         // Delete response and pop from queue
-        delete response;
         pendingResponses.pop();
     }
 
@@ -197,8 +209,8 @@ void HttpConnection::bytesWritten(qint64 bytes)
 
 void HttpConnection::timeout()
 {
-    // If we are in keep-alive mode (meaning this socket has already had one successful request) and there is no data that's been read,
-    // we just close the socket peacefully
+    // If we are in keep-alive mode (meaning this socket has already had one successful request) and there is no data
+    // that's been read, we just close the socket peacefully
     if (keepAliveMode && (!currentRequest || currentRequest->state() != HttpRequest::State::ReadRequestLine))
     {
         socket->disconnectFromHost();
@@ -207,7 +219,7 @@ void HttpConnection::timeout()
 
     // Otherwise we send a request timeout response
     if (!currentResponse)
-        currentResponse = new HttpResponse(config, this);
+        currentResponse = new HttpResponse(config);
 
     currentResponse->setError(HttpStatus::RequestTimeout, "", true);
     currentResponse->prepareToSend();
@@ -219,77 +231,12 @@ void HttpConnection::timeout()
     socket->disconnectFromHost();
 }
 
-void HttpConnection::responseTimeout()
-{
-    // Grab the timer that called this function and try to find the corresponding response by value in the responseTimers map
-    QTimer *timer = (QTimer *)QObject::sender();
-    auto it = std::find_if(responseTimers.begin(), responseTimers.end(), [timer](const std::pair<HttpResponse *, QTimer *> &x) { return x.second == timer; });
-
-    // If the response could not be found, then we just delete the timer and do nothing
-    // This should NEVER happen
-    //
-    // Otherwise, if the response has already been set, then it means we are currently sending the response
-    // It's very unlikely this will occur
-    if (it == responseTimers.end())
-    {
-        timer->deleteLater();
-        return;
-    }
-    else if (it->first->isValid())
-    {
-        timer->deleteLater();
-        responseTimers.erase(it);
-        return;
-    }
-
-    HttpResponse *response = it->first;
-
-    // This signal is used to notify the request handler to stop using the pointer because it's going to be deleted
-    emit response->cancelled();
-
-    // Dont emit finished signal
-    response->setError(HttpStatus::RequestTimeout, "", false, false);
-    response->prepareToSend();
-
-    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-    if (response == pendingResponses.front())
-        bytesWritten(0);
-
-    // Delete timer (the response will be deleted after it is sent)
-    timer->deleteLater();
-    responseTimers.erase(it);
-}
-
-void HttpConnection::responseFinished()
-{
-    // Retrieve the response that called finish
-    HttpResponse *response = (HttpResponse *)QObject::sender();
-
-    // Find the corresponding timer for the response and delete it
-    auto it = responseTimers.find(response);
-    if (it != responseTimers.end())
-    {
-        it->second->deleteLater();
-        responseTimers.erase(it);
-    }
-
-    response->prepareToSend();
-
-    // If we were waiting on this response to be sent, then call bytesWritten to get things rolling
-    if (response == pendingResponses.front())
-        bytesWritten(0);
-}
-
 void HttpConnection::socketDisconnected()
 {
     if (config->verbosity >= HttpServerConfig::Verbose::Debug)
         qDebug().noquote() << QString("Client %1 disconnected").arg(address.toString());
 
     timeoutTimer->stop();
-
-    for (auto timer : responseTimers)
-        timer.second->stop();
-
     emit disconnected();
 }
 
@@ -298,10 +245,10 @@ void HttpConnection::sslErrors(const QList<QSslError> &errors)
     if (config->verbosity >= HttpServerConfig::Verbose::Warning)
     {
         // Combine all the SSL error messages into one string delineated by commas
-        QString errorMessages = std::accumulate(errors.begin(), errors.end(), QString(""), [](const QString &str, const QSslError &error)
-        {
-            return str.isEmpty() ? error.errorString() : str + ", " + error.errorString();
-        });
+        QString errorMessages = std::accumulate(errors.begin(), errors.end(), QString(""),
+            [](const QString str, const QSslError &error) {
+                return str.isEmpty() ? error.errorString() : str + ", " + error.errorString();
+            });
 
         qWarning().noquote() << QString("TLS handshake failed for client %1: %2").arg(address.toString()).arg(errorMessages);
     }
@@ -315,21 +262,14 @@ HttpConnection::~HttpConnection()
     delete timeoutTimer;
     delete socket;
 
-    for (auto timer : responseTimers)
-        delete timer.second;
-    responseTimers.clear();
-
     // Delete pending responses
     while (!pendingResponses.empty())
-    {
-        delete pendingResponses.front();
         pendingResponses.pop();
-    }
 
-    // Delete pending requests
-    for (auto it : requests)
-        delete it.second;
-    requests.clear();
+    // Clear pending requests, will be automatically cleaned up
+    for (auto it : data)
+        it.second->finished = true;
+    data.clear();
 
     if (currentRequest)
     {

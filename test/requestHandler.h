@@ -1,11 +1,15 @@
 #ifndef REQUESTHANDLER_H
 #define REQUESTHANDLER_H
 
+#include <QtPromise>
 #include <QTimer>
 
+#include "httpServer/httpData.h"
 #include "httpServer/httpRequestHandler.h"
 #include "httpServer/httpRequestRouter.h"
 
+
+using QtPromise::QPromise;
 
 class RequestHandler : public HttpRequestHandler
 {
@@ -15,14 +19,14 @@ private:
 public:
     RequestHandler();
 
-    void handle(HttpRequest *request, HttpResponse *response);
+    HttpPromise handle(HttpDataPtr data);
 
-    void handleGetUsername(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    void handleGzipTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    void handleFormTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    void handleFileTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    void handleErrorTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
-    void handleAsyncTest(const QRegularExpressionMatch &match, HttpRequest *request, HttpResponse *response);
+    HttpPromise handleGetUsername(HttpDataPtr data);
+    HttpPromise handleGzipTest(HttpDataPtr data);
+    HttpPromise handleFormTest(HttpDataPtr data);
+    HttpPromise handleFileTest(HttpDataPtr data);
+    HttpPromise handleErrorTest(HttpDataPtr data);
+    HttpPromise handleAsyncTest(HttpDataPtr data);
 };
 
 #endif // REQUESTHANDLER_H

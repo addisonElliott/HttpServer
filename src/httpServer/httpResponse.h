@@ -1,5 +1,5 @@
-#ifndef HTTP_RESPONSE_H
-#define HTTP_RESPONSE_H
+#ifndef HTTP_SERVER_HTTP_RESPONSE_H
+#define HTTP_SERVER_HTTP_RESPONSE_H
 
 #include "httpCookie.h"
 #include "httpServerConfig.h"
@@ -54,24 +54,22 @@ public:
     bool header(QString key, QString *value) const;
     bool cookie(QString name, HttpCookie *cookie) const;
 
-    // Make sure you only call this once per repsonse!
-    // Or, better, just rely on setStatus to do it for you
-    void setFinished();
-
-    void setStatus(HttpStatus status, bool finished_ = true);
-    void setStatus(HttpStatus status, QByteArray body, QString contentType = "", bool finished_ = true);
-    void setStatus(HttpStatus status, QJsonDocument body, bool finished_ = true);
-    void setStatus(HttpStatus status, QString body, QString mimeType, bool finished_ = true);
+    void setStatus(HttpStatus status);
+    void setStatus(HttpStatus status, QByteArray body, QString contentType = "");
+    void setStatus(HttpStatus status, QJsonDocument body);
+    void setStatus(HttpStatus status, QString body, QString mimeType);
     void setBody(QByteArray body);
 
-    void setError(HttpStatus status, QString errorMessage = "", bool closeConnection = false, bool finished_ = true);
+    void setError(HttpStatus status, QString errorMessage = "", bool closeConnection = false);
 
     void redirect(QUrl url, bool permanent = false);
     void redirect(QString url, bool permanent = false);
     void compressBody(int compressionLevel = Z_DEFAULT_COMPRESSION);
 
-    void sendFile(QString filename, QString mimeType = "", QString charset = "", int len = -1, int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
-    void sendFile(QIODevice *device, QString mimeType = "", QString charset = "", int len = -1, int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
+    void sendFile(QString filename, QString mimeType = "", QString charset = "", int len = -1,
+        int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
+    void sendFile(QIODevice *device, QString mimeType = "", QString charset = "", int len = -1,
+        int compressionLevel = -2, QString attachmentFilename = "", int cacheTime = 0);
 
     void setCookie(HttpCookie &cookie);
 
@@ -82,11 +80,6 @@ public:
     void setupFromRequest(HttpRequest *request);
     void prepareToSend();
     bool writeChunk(QTcpSocket *socket);
-
-signals:
-    // When this signal is called, if asynchronous work is being done, the user MUST not use the response pointer again because it will be deleted
-    void cancelled();
-    void finished();
 };
 
-#endif // HTTP_RESPONSE_H
+#endif // HTTP_SERVER_HTTP_RESPONSE_H

@@ -54,3 +54,5 @@ release/
 *.csr
 *.key
 *.p12
+
+.vscode

@@ -1,5 +1,5 @@
-#ifndef HTTPSERVER_H
-#define HTTPSERVER_H
+#ifndef HTTP_SERVER_HTTPSERVER_H
+#define HTTP_SERVER_HTTPSERVER_H
 
 #include "httpConnection.h"
 #include "httpServerConfig.h"
@@ -11,7 +11,8 @@
 #include <QTcpServer>
 
 
-// HTTP server is HTTP/1.1 compliant and is based on RFC7230 series. This specification was created in June 2014 and obsoletes RFC2616, RFC2145
+// HTTP server is HTTP/1.1 compliant and is based on RFC7230 series. This specification was created in June 2014 and
+// obsoletes RFC2616, RFC2145
 class HTTPSERVER_EXPORT HttpServer : public QTcpServer
 {
     Q_OBJECT
@@ -43,4 +44,4 @@ signals:
 
 };
 
-#endif // HTTPSERVER_H
+#endif // HTTP_SERVER_HTTPSERVER_H

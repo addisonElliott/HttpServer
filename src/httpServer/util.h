@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef HTTP_SERVER_UTIL_H
+#define HTTP_SERVER_UTIL_H
 
 #include <algorithm>
 #include <functional>
@@ -162,9 +162,18 @@ static const std::map<int, QString> httpStatusStrs {
     {511, "Network Authentication Required"}
 };
 
+struct HttpException : public std::exception
+{
+    const HttpStatus status;
+    const QString message;
+
+    HttpException(HttpStatus status) : status(status), message() {}
+    HttpException(HttpStatus status, QString message) : status(status), message(message) {}
+};
+
 struct QStringCaseSensitiveHash
 {
-    size_t operator()(const QString &str) const
+    size_t operator()(const QString str) const
     {
         static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -175,7 +184,7 @@ struct QStringCaseSensitiveHash
 
 struct QStringCaseSensitiveEqual
 {
-    bool operator()(const QString &str1, const QString &str2) const
+    bool operator()(const QString str1, const QString str2) const
     {
         return str1.compare(str2, Qt::CaseSensitive) == 0;
     }
@@ -183,7 +192,7 @@ struct QStringCaseSensitiveEqual
 
 struct QStringCaseInsensitiveHash
 {
-    size_t operator()(const QString &str) const
+    size_t operator()(const QString str) const
     {
         static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -194,7 +203,7 @@ struct QStringCaseInsensitiveHash
 
 struct QStringCaseInSensitiveEqual
 {
-    bool operator()(const QString &str1, const QString &str2) const
+    bool operator()(const QString str1, const QString str2) const
     {
         return str1.compare(str2, Qt::CaseInsensitive) == 0;
     }
@@ -205,7 +214,7 @@ namespace std
     // Default hash and comparator for QString is case-sensitive
     template<> struct hash<QString>
     {
-        size_t operator()(const QString &str) const
+        size_t operator()(const QString str) const
         {
             static const unsigned int seed = (unsigned int)qGlobalQHashSeed();
 
@@ -215,7 +224,7 @@ namespace std
 
     template<> struct equal_to<QString>
     {
-        bool operator()(const QString &str1, const QString &str2) const
+        bool operator()(const QString str1, const QString str2) const
         {
             return str1.compare(str2, Qt::CaseSensitive) == 0;
         }
@@ -227,4 +236,4 @@ HTTPSERVER_EXPORT QString getHttpStatusStr(HttpStatus status);
 QByteArray gzipCompress(QByteArray &data, int compressionLevel = Z_DEFAULT_COMPRESSION);
 QByteArray gzipUncompress(QByteArray &data);
 
-#endif // UTIL_H
+#endif // HTTP_SERVER_UTIL_H
