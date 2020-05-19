@@ -35,12 +35,15 @@ Prerequisites
 * Qt & Qt Creator for IDE
 * zlib
 * OpenSSL binaries for TLS support (see [here](https://doc.qt.io/qt-5/ssl.html#enabling-and-disabling-ssl-support))
+* QtPromise for promise support (see [here](https://qtpromise.netlify.app/qtpromise/getting-started.html#installation) for installation instructions)
 
 Building HttpServer
 -------------------------
 1. Open `HttpServer.pro` in Qt Creator.
 2. Create a `common.pri` file in the top-level directory. This will store any specific include & library paths on a per-machine basis.
    * Append paths to your `zlib` build with `INCLUDEPATH` and `LIBS`
+   * Append paths to your `qtpromise` directory with `INCLUDEPATH` (QtPromise is a header-only library)
+      * Note: You can include the provided `qtpromise.pri` to do this for your. Alternatively, you can install the headers to a system-configured path in which case you don't need to do anything.
    * Make sure on Windows that the compiled zlib DLL is in your environment `PATH` variable
 3. Build and run the application
    * Building the application will build the shared library as well as the test application. When you press run, it will run the test application in which you can experiment with the library via the provided URLs
