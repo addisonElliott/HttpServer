@@ -110,7 +110,7 @@ void HttpConnection::read()
         if (config->responseTimeout > 0)
             promise = promise.timeout(config->responseTimeout * 1000);
 
-        promise.timeout(5000)
+        promise
             .fail([=](const QPromiseTimeoutException &error) {
                 // Request timed out
                 response->setError(HttpStatus::RequestTimeout, "", false);
@@ -125,6 +125,11 @@ void HttpConnection::read()
                 return nullptr;
             })
             .finally([=]() {
+                // If response is already finished, don't do anything
+                // This can occur if the socket is closed prematurely
+                if (httpData->finished)
+                    return;
+
                 // Handle if no response is set
                 // This should not happen, but handle it and warn the user
                 if (!response->isValid())
