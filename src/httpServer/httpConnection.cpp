@@ -287,11 +287,13 @@ void HttpConnection::debug()
     printf("Connection\n");
     printf("--------------------------------------------------------------------------------\n");
     printf("Pending responses: %i\n", pendingResponses.size());
+    printf("Data: %i\n", data.size());
     printf("--------------------------------------------------------------------------------\n");
 }
 
 HttpConnection::~HttpConnection()
 {
+    printf("Delete HttpConnection (%s)\n", qUtf8Printable(address.toString()));
     delete timeoutTimer;
     delete socket;
 
