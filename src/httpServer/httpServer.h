@@ -33,6 +33,8 @@ public:
     bool listen();
     void close();
 
+    void debug();
+
 protected:
     void incomingConnection(qintptr socketDescriptor);
 

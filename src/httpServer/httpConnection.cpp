@@ -63,6 +63,7 @@ void HttpConnection::read()
         // Create new request if necessary
         if (!currentRequest)
         {
+            printf("New request for %s (%i)\n", qUtf8Printable(address.toString()), pendingResponses.size());
             currentRequest = new HttpRequest(config);
             currentResponse = new HttpResponse(config);
         }
@@ -105,6 +106,7 @@ void HttpConnection::read()
         auto request = currentRequest;
         auto response = currentResponse;
         auto promise = HttpPromise::resolve(httpData).then([=](HttpDataPtr data) {
+            printf("1.1 (%i, %i)\n", httpData->testValue, data.use_count());
             return requestHandler->handle(data);
         });
         if (config->responseTimeout > 0)
@@ -112,23 +114,29 @@ void HttpConnection::read()
 
         promise
             .fail([=](const QPromiseTimeoutException &error) {
+                printf("1.2 (%i)\n", httpData->testValue);
                 // Request timed out
                 response->setError(HttpStatus::RequestTimeout, "", false);
                 return nullptr;
             })
             .fail([=](const HttpException &error) {
+                printf("1.3 (%i)\n", httpData->testValue);
                 response->setError(error.status, error.message, false);
                 return nullptr;
             })
             .fail([=](const std::exception &error) {
+                printf("1.4 (%i)\n", httpData->testValue);
                 response->setError(HttpStatus::InternalServerError, error.what(), false);
                 return nullptr;
             })
             .finally([=]() {
+                printf("1.5 (%i, %i)\n", httpData->testValue, httpData.use_count());
                 // If response is already finished, don't do anything
                 // This can occur if the socket is closed prematurely
                 if (httpData->finished)
                     return;
+
+                printf("1.6 (%i, %i)\n", httpData->testValue, response == pendingResponses.front());
 
                 // Handle if no response is set
                 // This should not happen, but handle it and warn the user
@@ -163,9 +171,12 @@ void HttpConnection::bytesWritten(qint64 bytes)
 {
     bool closeConnection = false;
 
+    printf("3.1\n");
+
     // Keep sending the responses until the buffer fills up
     while (!pendingResponses.empty())
     {
+        printf("3.2\n");
         // If the response has not been prepared for sending, it means we're still waiting for a response
         // from this. Due to the setup of HTTP pipelining, we must send responses in the same order we received them,
         // so we can't send anything else)
@@ -173,9 +184,13 @@ void HttpConnection::bytesWritten(qint64 bytes)
         if (!response->isSending())
             break;
 
+        printf("3.3\n");
+
         // If writeChunk returns false, means buffer is full
         if (!response->writeChunk(socket))
             break;
+
+        printf("3.4\n");
 
         // Read connection header, default to keep-alive
         QString connection;
@@ -185,12 +200,17 @@ void HttpConnection::bytesWritten(qint64 bytes)
         // If any of the responses say to close the connection, then do that
         closeConnection |= connection.contains("close", Qt::CaseInsensitive);
 
+        printf("3.5\n");
+
         // Delete the corresponding request for the response
         auto it = data.find(response);
         if (it != data.end())
         {
+            printf("3.6 (%i, %i)\n", it->second->testValue, it->second.use_count());
+            // TODO If we don't get here then something went wrong.
             it->second->finished = true;
             data.erase(it);
+            printf("3.6.1 (%i)\n", data.size());
         }
 
         // Delete response and pop from queue
@@ -260,6 +280,14 @@ void HttpConnection::sslErrors(const QList<QSslError> &errors)
 
     // Connection will automatically disconnect
     // A response is not sent back here because it will not be encrypted
+}
+
+void HttpConnection::debug()
+{
+    printf("Connection\n");
+    printf("--------------------------------------------------------------------------------\n");
+    printf("Pending responses: %i\n", pendingResponses.size());
+    printf("--------------------------------------------------------------------------------\n");
 }
 
 HttpConnection::~HttpConnection()

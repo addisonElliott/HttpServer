@@ -14,6 +14,8 @@ class HttpResponse;
 
 struct HTTPSERVER_EXPORT HttpData
 {
+    int testValue;
+
     HttpRequest *request;
     HttpResponse *response;
     std::unordered_map<QString, QVariant> state;

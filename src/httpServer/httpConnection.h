@@ -50,6 +50,8 @@ public:
         QSslConfiguration *sslConfig = nullptr, QObject *parent = nullptr);
     ~HttpConnection();
 
+    void debug();
+
 private slots:
     void read();
     void bytesWritten(qint64 bytes);

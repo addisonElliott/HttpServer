@@ -172,6 +172,13 @@ void HttpServer::connectionDisconnected()
     connection->deleteLater();
 }
 
+void HttpServer::debug()
+{
+    printf("Total of %i connections\n", connections.size());
+    for (auto connection : connections)
+        connection->debug();
+}
+
 HttpServer::~HttpServer()
 {
     for (HttpConnection *connection : connections)
