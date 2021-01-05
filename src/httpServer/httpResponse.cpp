@@ -74,7 +74,7 @@ void HttpResponse::setStatus(HttpStatus status, QByteArray body, QString content
 void HttpResponse::setStatus(HttpStatus status, QJsonDocument body)
 {
     status_ = status;
-    body_ = body.toJson();
+    body_ = body.toJson(QJsonDocument::Compact);
 
     setHeader("Content-Type", "application/json");
 }
