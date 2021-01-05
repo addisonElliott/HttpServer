@@ -197,6 +197,8 @@ void HttpConnection::bytesWritten(qint64 bytes)
         pendingResponses.pop();
     }
 
+    socket->flush();
+
     // If we are done sending responses, close the connection or start keep-alive timer
     if (pendingResponses.empty())
     {

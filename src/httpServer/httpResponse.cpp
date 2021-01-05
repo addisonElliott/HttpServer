@@ -299,8 +299,6 @@ bool HttpResponse::writeChunk(QTcpSocket *socket)
         return true;
     }
 
-    socket->flush();
-
     // Increment the bytes written, if we wrote the entire buffer, return true, otherwise return false
     writeIndex += bytesWritten;
     if (writeIndex >= buffer.size() - 1)
