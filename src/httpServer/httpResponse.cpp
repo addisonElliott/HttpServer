@@ -74,7 +74,7 @@ void HttpResponse::setStatus(HttpStatus status, QByteArray body, QString content
 void HttpResponse::setStatus(HttpStatus status, QJsonDocument body)
 {
     status_ = status;
-    body_ = body.toJson();
+    body_ = body.toJson(QJsonDocument::Compact);
 
     setHeader("Content-Type", "application/json");
 }
@@ -254,6 +254,8 @@ void HttpResponse::prepareToSend()
 
     writeIndex = 0;
     buffer.clear();
+    // Reserve a generally acceptable amount of space
+    buffer.reserve(2048 + body_.length());
 
     // Status line
     buffer += version_;
@@ -289,7 +291,7 @@ void HttpResponse::prepareToSend()
 
 bool HttpResponse::writeChunk(QTcpSocket *socket)
 {
-    int bytesWritten = socket->write(buffer.mid(writeIndex));
+    int bytesWritten = socket->write(&buffer.data()[writeIndex], buffer.length() - writeIndex);
     if (bytesWritten == -1)
     {
         // Force close the socket and say we're done
