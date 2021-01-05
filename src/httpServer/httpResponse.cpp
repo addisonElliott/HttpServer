@@ -291,7 +291,7 @@ void HttpResponse::prepareToSend()
 
 bool HttpResponse::writeChunk(QTcpSocket *socket)
 {
-    int bytesWritten = socket->write(buffer.mid(writeIndex));
+    int bytesWritten = socket->write(&buffer.data()[writeIndex]);
     if (bytesWritten == -1)
     {
         // Force close the socket and say we're done
