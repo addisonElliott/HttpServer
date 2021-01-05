@@ -254,6 +254,8 @@ void HttpResponse::prepareToSend()
 
     writeIndex = 0;
     buffer.clear();
+    // Reserve a generally acceptable amount of space
+    buffer.reserve(2048 + body_.length());
 
     // Status line
     buffer += version_;
