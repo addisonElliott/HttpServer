@@ -211,6 +211,7 @@ struct QStringCaseInSensitiveEqual
 
 namespace std
 {
+    #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     // Default hash and comparator for QString is case-sensitive
     template<> struct hash<QString>
     {
@@ -221,7 +222,7 @@ namespace std
             return qHash(str, seed);
         }
     };
-
+    #endif
     template<> struct equal_to<QString>
     {
         bool operator()(const QString str1, const QString str2) const
