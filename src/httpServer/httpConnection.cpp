@@ -266,8 +266,9 @@ void HttpConnection::sslErrors(const QList<QSslError> &errors)
 
 HttpConnection::~HttpConnection()
 {
-    delete timeoutTimer;
+    socket->abort();
     delete socket;
+    delete timeoutTimer;
 
     // Delete pending responses
     while (!pendingResponses.empty())
