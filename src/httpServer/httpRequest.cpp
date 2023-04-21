@@ -500,7 +500,7 @@ void HttpRequest::parseContentType()
     }
 
     // Attempt to match syntax for multipart/form-data content type (specifies a boundary instead of a charset)
-    QRegularExpression formDataRegex("^multipart/form-data;\\s*boundary=\"?(.*)\"?$");
+    QRegularExpression formDataRegex("^multipart/form-data;\\s*boundary=\"?([^\"]*)\"?$");
     auto match = formDataRegex.match(contentType);
     if (match.hasMatch())
     {
