@@ -5,6 +5,9 @@ add_executable(example
   requestHandler.cpp
 )
 
+target_compile_definitions(example PRIVATE
+  "-DROOTDIR=\"${CMAKE_CURRENT_LIST_DIR}/root\"")
+
 target_link_libraries(example PUBLIC
   httpserver
   fmt

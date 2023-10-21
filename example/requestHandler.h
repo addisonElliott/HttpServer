@@ -18,7 +18,7 @@ private:
     QString root_dir_;
 
 public:
-    RequestHandler(const QString& root_dir = "/tmp");
+    RequestHandler(const QString& root_dir);
 
     HttpPromise handle(HttpDataPtr data) override;
     HttpPromise handleFile(HttpDataPtr data);
