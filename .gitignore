@@ -56,3 +56,4 @@ release/
 *.p12
 
 .vscode
+/build_debug/

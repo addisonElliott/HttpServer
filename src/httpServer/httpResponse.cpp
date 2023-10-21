@@ -258,19 +258,19 @@ void HttpResponse::prepareToSend()
     buffer.reserve(2048 + body_.length());
 
     // Status line
-    buffer += version_;
+    buffer += version_.toUtf8();
     buffer += ' ';
-    buffer += QString::number((int)status_);
+    buffer += QString::number((int)status_).toUtf8();
     buffer += ' ';
-    buffer += getHttpStatusStr(status_);
+    buffer += getHttpStatusStr(status_).toUtf8();
     buffer += "\r\n";
 
     // Headers
     for (auto &keyValue : headers)
     {
-        buffer += keyValue.first;
+        buffer += keyValue.first.toUtf8();
         buffer += ": ";
-        buffer += keyValue.second;
+        buffer += keyValue.second.toUtf8();
         buffer += "\r\n";
     }
 

@@ -34,13 +34,13 @@ struct HTTPSERVER_EXPORT HttpCookie
         buf += QUrl::toPercentEncoding(value);
 
         if (expiration.isValid())
-            buf += "; Expires=" + expiration.toString(Qt::RFC2822Date);
+            buf += "; Expires=" + expiration.toString(Qt::RFC2822Date).toUtf8();
 
         if (ageSeconds > 0)
-            buf += "; Max-Age=" + QString::number(ageSeconds);
+            buf += "; Max-Age=" + QString::number(ageSeconds).toUtf8();
 
         if (!domain.isEmpty())
-            buf += "; Domain=" + domain;
+            buf += "; Domain=" + domain.toUtf8();
 
         if (!path.isEmpty())
             buf += "; Path=" + QUrl::toPercentEncoding(path);
